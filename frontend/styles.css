@@ -1,0 +1,9 @@
+body { font-family: Arial, sans-serif; margin: 0; background: #f4f6fa; }
+header { background: #1a3f75; color: #fff; padding: 12px 20px; display: flex; justify-content: space-between; }
+.tabs { display: flex; gap: 8px; padding: 10px 20px; background: #dce6f8; }
+.tabs button { padding: 8px 10px; border: none; background: #2d5aa3; color: #fff; cursor: pointer; }
+.card { margin: 16px 20px; padding: 16px; background: #fff; border-radius: 10px; box-shadow: 0 2px 6px rgba(0,0,0,.08); }
+.hidden { display: none; }
+input, textarea { width: 100%; margin-bottom: 8px; padding: 8px; }
+table { width: 100%; border-collapse: collapse; margin-top: 8px; }
+th, td { border: 1px solid #ddd; padding: 6px; text-align: left; }

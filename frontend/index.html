@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>E-YUVA Grant Programme Manager</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header>
+      <h1>E-YUVA Centre Grant Manager</h1>
+      <div id="profile">Not logged in</div>
+    </header>
+
+    <section id="loginCard" class="card">
+      <h2>Login</h2>
+      <input id="email" placeholder="Email" />
+      <input id="password" type="password" placeholder="Password" />
+      <button onclick="login()">Login</button>
+    </section>
+
+    <nav class="tabs">
+      <button onclick="showTab('centre')">Centre Dashboard</button>
+      <button onclick="showTab('fellow')">Fellow Dashboard</button>
+      <button onclick="showTab('calendar')">Calendar & Events</button>
+      <button onclick="showTab('reports')">Reports & Templates</button>
+    </nav>
+
+    <main>
+      <section id="centre" class="tab card">
+        <h2>Centre Dashboard</h2>
+        <p>Shows sanctioned/spent/remaining by budget head with chart placeholders.</p>
+        <button onclick="loadCentreSummary()">Refresh Summary</button>
+        <table id="centreTable">
+          <thead><tr><th>Head</th><th>Sanctioned</th><th>Spent</th><th>Remaining</th><th>%</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </section>
+
+      <section id="fellow" class="tab card hidden">
+        <h2>Fellow Dashboard</h2>
+        <p>Project-level subgrant budget status, burn-rate and reconciliation placeholders.</p>
+      </section>
+
+      <section id="calendar" class="tab card hidden">
+        <h2>Calendar & Events</h2>
+        <p>Create events, request prior approval, and attach evidence.</p>
+        <button onclick="createSampleEvent()">Create Sample Event</button>
+        <pre id="eventResult"></pre>
+      </section>
+
+      <section id="reports" class="tab card hidden">
+        <h2>Reports & Templates</h2>
+        <h3>Template editor (JSON + HTML)</h3>
+        <textarea id="templateJson" rows="8">{"sections":[{"name":"Summary"}]}</textarea>
+        <textarea id="templateHtml" rows="8"><h1>{{ project_name }}</h1><p>Total spent: {{ total_spent }}</p></textarea>
+        <button onclick="createTemplate()">Save Template</button>
+        <pre id="templateResult"></pre>
+      </section>
+    </main>
+
+    <script src="app.js"></script>
+  </body>
+</html>
