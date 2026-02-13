@@ -69,3 +69,16 @@ uvicorn app.main:app --reload
 ```
 
 Open `http://127.0.0.1:8000` for dashboard UI and `http://127.0.0.1:8000/docs` for Swagger.
+
+
+### Windows (PowerShell)
+
+```powershell
+py -m venv .venv
+.\.venv\Scripts\Activate.ps1
+pip install -r requirements.txt
+uvicorn app.main:app --reload --port 8010
+```
+
+You can change the port (for example if 8000 is already used) with `--port <number>`.
+Then open `http://127.0.0.1:<number>` and `http://127.0.0.1:<number>/docs`.

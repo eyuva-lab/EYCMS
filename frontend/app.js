@@ -5,9 +5,18 @@ function authHeaders() {
   return token ? { Authorization: `Bearer ${token}` } : {};
 }
 
-function showTab(id) {
-  document.querySelectorAll('.tab').forEach((x) => x.classList.add('hidden'));
-  document.getElementById(id).classList.remove('hidden');
+function setupTabs() {
+  const tabs = document.querySelectorAll('.tab');
+  const panels = document.querySelectorAll('.panel');
+
+  tabs.forEach((tab) => {
+    tab.addEventListener('click', () => {
+      tabs.forEach((t) => t.classList.remove('active'));
+      panels.forEach((p) => p.classList.remove('active'));
+      tab.classList.add('active');
+      document.getElementById(tab.dataset.target).classList.add('active');
+    });
+  });
 }
 
 async function login() {
@@ -20,6 +29,10 @@ async function login() {
     body,
   });
   const data = await res.json();
+  if (!res.ok) {
+    document.getElementById('profile').textContent = data.detail || 'Login failed';
+    return;
+  }
   token = data.access_token;
   localStorage.setItem('token', token);
   loadProfile();
@@ -28,6 +41,7 @@ async function login() {
 async function loadProfile() {
   if (!token) return;
   const res = await fetch(`${api}/auth/me`, { headers: authHeaders() });
+  if (!res.ok) return;
   const me = await res.json();
   document.getElementById('profile').innerText = `${me.name} (${me.role})`;
 }
@@ -35,6 +49,7 @@ async function loadProfile() {
 async function loadCentreSummary() {
   const res = await fetch(`${api}/transactions/centre-summary`, { headers: authHeaders() });
   const rows = await res.json();
+  if (!res.ok || !Array.isArray(rows)) return;
   const tbody = document.querySelector('#centreTable tbody');
   tbody.innerHTML = '';
   rows.forEach((r) => {
@@ -78,4 +93,9 @@ async function createTemplate() {
   document.getElementById('templateResult').innerText = JSON.stringify(await res.json(), null, 2);
 }
 
+document.getElementById('loginBtn').addEventListener('click', login);
+document.getElementById('refreshSummaryBtn').addEventListener('click', loadCentreSummary);
+document.getElementById('sampleEventBtn').addEventListener('click', createSampleEvent);
+document.getElementById('saveTemplateBtn').addEventListener('click', createTemplate);
+setupTabs();
 loadProfile();

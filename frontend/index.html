@@ -3,61 +3,118 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>E-YUVA Grant Programme Manager</title>
+    <title>E-YUVA Grant System</title>
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
     <header>
-      <h1>E-YUVA Centre Grant Manager</h1>
-      <div id="profile">Not logged in</div>
+      <div>
+        <h1>E-YUVA Grant, Subgrants & Events System</h1>
+        <p>Budgets · UC generation · Evidence logging · Calendar-driven approvals</p>
+      </div>
+      <div class="profile-wrap">
+        <div id="profile" class="badge">Not logged in</div>
+      </div>
     </header>
 
-    <section id="loginCard" class="card">
-      <h2>Login</h2>
-      <input id="email" placeholder="Email" />
-      <input id="password" type="password" placeholder="Password" />
-      <button onclick="login()">Login</button>
-    </section>
+    <div class="container">
+      <section id="loginCard" class="section">
+        <h2>Login</h2>
+        <div class="filters">
+          <label>Email <input id="email" type="email" placeholder="name@example.com" /></label>
+          <label>Password <input id="password" type="password" placeholder="Password" /></label>
+          <button id="loginBtn" type="button">Login</button>
+        </div>
+      </section>
 
-    <nav class="tabs">
-      <button onclick="showTab('centre')">Centre Dashboard</button>
-      <button onclick="showTab('fellow')">Fellow Dashboard</button>
-      <button onclick="showTab('calendar')">Calendar & Events</button>
-      <button onclick="showTab('reports')">Reports & Templates</button>
-    </nav>
+      <nav class="tab-bar" aria-label="Main tabs">
+        <button class="tab active" data-target="centre">Centre Dashboard</button>
+        <button class="tab" data-target="fellow">Fellow Dashboard</button>
+        <button class="tab" data-target="calendar">Calendar & Events</button>
+        <button class="tab" data-target="reports">Reports & Templates</button>
+      </nav>
 
-    <main>
-      <section id="centre" class="tab card">
-        <h2>Centre Dashboard</h2>
-        <p>Shows sanctioned/spent/remaining by budget head with chart placeholders.</p>
-        <button onclick="loadCentreSummary()">Refresh Summary</button>
+      <section id="centre" class="panel section active">
+        <h2>Centre Budget Overview</h2>
+        <p>
+          Sanctioned vs spent vs remaining for each GLA head, reconciled to bank and UC-style unspent amounts.
+          <span class="badge">Parent Grant · Double-entry backend</span>
+        </p>
+
+        <div class="filters">
+          <label>From: <input type="date" value="2022-05-02" /></label>
+          <label>To: <input type="date" value="2025-04-05" /></label>
+          <label>
+            View:
+            <select>
+              <option>All heads</option>
+              <option>Non-recurring</option>
+              <option>Recurring</option>
+            </select>
+          </label>
+          <label>
+            Chart type:
+            <select>
+              <option>Bar</option>
+              <option>Line</option>
+              <option>Pie</option>
+            </select>
+          </label>
+          <button id="refreshSummaryBtn" type="button">Refresh from API</button>
+        </div>
+
         <table id="centreTable">
-          <thead><tr><th>Head</th><th>Sanctioned</th><th>Spent</th><th>Remaining</th><th>%</th></tr></thead>
-          <tbody></tbody>
+          <thead>
+            <tr>
+              <th>Budget Head (GLA)</th>
+              <th>Sanctioned</th>
+              <th>Spent (Period)</th>
+              <th>Remaining</th>
+              <th>% Utilised</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td>Fellowships – E-YUVA & Innovation</td><td>₹ 1,20,00,000</td><td>₹ 72,00,000</td><td>₹ 48,00,000</td><td>60%</td></tr>
+            <tr><td>Workshops & Training</td><td>₹ 20,00,000</td><td>₹ 9,50,000</td><td>₹ 10,50,000</td><td>47.5%</td></tr>
+            <tr><td>Travel – Fellows & Staff</td><td>₹ 10,00,000</td><td>₹ 3,20,000</td><td>₹ 6,80,000</td><td>32%</td></tr>
+          </tbody>
         </table>
       </section>
 
-      <section id="fellow" class="tab card hidden">
-        <h2>Fellow Dashboard</h2>
-        <p>Project-level subgrant budget status, burn-rate and reconciliation placeholders.</p>
+      <section id="fellow" class="panel section">
+        <h2>Fellow Subgrant Overview</h2>
+        <p>Project-level subgrant tracking with head-wise budgets, burn-rate, and reconciliation.</p>
+        <table>
+          <thead><tr><th>Fellow Budget Head</th><th>Sanctioned</th><th>Spent</th><th>Remaining</th></tr></thead>
+          <tbody>
+            <tr><td>Prototype Materials & Lab Consumables</td><td>₹ 3,00,000</td><td>₹ 1,80,000</td><td>₹ 1,20,000</td></tr>
+            <tr><td>Market Research & Pilots</td><td>₹ 1,50,000</td><td>₹ 70,000</td><td>₹ 80,000</td></tr>
+          </tbody>
+        </table>
       </section>
 
-      <section id="calendar" class="tab card hidden">
-        <h2>Calendar & Events</h2>
-        <p>Create events, request prior approval, and attach evidence.</p>
-        <button onclick="createSampleEvent()">Create Sample Event</button>
+      <section id="calendar" class="panel section">
+        <h2>Calendar & Event Workflow</h2>
+        <p>Plan events, request prior approvals, and upload post-event evidence.</p>
+        <div class="chart-card">Monthly calendar placeholder (click date → create event)</div>
+        <button id="sampleEventBtn" type="button">Create Sample Event</button>
         <pre id="eventResult"></pre>
       </section>
 
-      <section id="reports" class="tab card hidden">
+      <section id="reports" class="panel section">
         <h2>Reports & Templates</h2>
-        <h3>Template editor (JSON + HTML)</h3>
-        <textarea id="templateJson" rows="8">{"sections":[{"name":"Summary"}]}</textarea>
-        <textarea id="templateHtml" rows="8"><h1>{{ project_name }}</h1><p>Total spent: {{ total_spent }}</p></textarea>
-        <button onclick="createTemplate()">Save Template</button>
+        <p>Generate BIRAC UC/SoE and activity summaries from reusable templates.</p>
+        <div class="filters">
+          <label>From: <input type="date" value="2024-04-01" /></label>
+          <label>To: <input type="date" value="2025-03-31" /></label>
+        </div>
+        <h3>Template editor</h3>
+        <textarea id="templateJson" rows="6">{"sections":[{"title":"Grant Summary"}]}</textarea>
+        <textarea id="templateHtml" rows="6"><h1>{{ project_name }}</h1><p>Total spent: {{ total_spent }}</p></textarea>
+        <button id="saveTemplateBtn" type="button">Save Template</button>
         <pre id="templateResult"></pre>
       </section>
-    </main>
+    </div>
 
     <script src="app.js"></script>
   </body>
