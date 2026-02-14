@@ -91,4 +91,4 @@ Then open `http://127.0.0.1:<number>` and `http://127.0.0.1:<number>/docs`.
 - Use **Login** first; after login the app hides the login card and shows your profile badge.
 - Use **Logout** button in the top-right to clear token/session from browser storage.
 - **Users** tab lets coordinator/finance create users and refresh user list.
-- **Operations Console** tab exposes working frontend controls for key backend routers (master data, transactions, bank, templates).
+- UI now includes an ERP-style workspace with module navigation: Dashboard, Master Data, Users, Calendar & Events, Transactions, and Reports & Templates.

@@ -3,143 +3,135 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>E-YUVA Grant System</title>
+    <title>E-YUVA ERP Workspace</title>
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
-    <header>
+    <header class="topbar">
       <div>
-        <h1>E-YUVA Grant, Subgrants & Events System</h1>
-        <p>Budgets · UC generation · Evidence logging · Calendar-driven approvals</p>
+        <h1>E-YUVA Grant ERP Workspace</h1>
+        <p>Manage accounts, projects, users, events, templates, and transactions in one interface.</p>
       </div>
-      <div class="profile-wrap">
-        <div id="profile" class="badge">Not logged in</div>
-        <button id="logoutBtn" type="button" class="ghost">Logout</button>
+      <div class="top-actions">
+        <span id="profile" class="badge">Not logged in</span>
+        <button id="logoutBtn" class="ghost" type="button">Logout</button>
       </div>
     </header>
 
-    <div class="container">
-      <section id="loginCard" class="section">
-        <h2>Login</h2>
-        <div class="filters">
-          <label>Email <input id="email" type="email" placeholder="name@example.com" /></label>
-          <label>Password <input id="password" type="password" placeholder="Password" /></label>
-          <button id="loginBtn" type="button">Login</button>
-        </div>
-      </section>
+    <section id="loginCard" class="card login-card">
+      <h2>Login</h2>
+      <div class="grid2">
+        <input id="email" type="email" placeholder="Email" />
+        <input id="password" type="password" placeholder="Password" />
+      </div>
+      <button id="loginBtn" type="button">Login</button>
+    </section>
 
-      <nav class="tab-bar" aria-label="Main tabs">
-        <button class="tab active" data-target="centre">Centre</button>
-        <button class="tab" data-target="fellow">Fellow</button>
-        <button class="tab" data-target="calendar">Events</button>
-        <button class="tab" data-target="reports">Reports</button>
-        <button class="tab" data-target="users">Users</button>
-        <button class="tab" data-target="ops">Operations Console</button>
-      </nav>
+    <div class="app-shell">
+      <aside class="sidebar">
+        <button class="nav-btn active" data-view="dashboard">Dashboard</button>
+        <button class="nav-btn" data-view="master">Master Data</button>
+        <button class="nav-btn" data-view="users">Users</button>
+        <button class="nav-btn" data-view="events">Calendar & Events</button>
+        <button class="nav-btn" data-view="transactions">Transactions</button>
+        <button class="nav-btn" data-view="reports">Reports & Templates</button>
+      </aside>
 
-      <section id="centre" class="panel section active">
-        <h2>Centre Budget Overview</h2>
-        <p>Refresh pulls data from <code>/transactions/centre-summary</code>.</p>
-        <div class="filters">
-          <button id="refreshSummaryBtn" type="button">Refresh Centre Summary</button>
-        </div>
-        <table id="centreTable">
-          <thead><tr><th>Budget Head</th><th>Sanctioned</th><th>Spent</th><th>Remaining</th><th>%</th></tr></thead>
-          <tbody></tbody>
-        </table>
-      </section>
+      <main class="content">
+        <section id="dashboard" class="view active card">
+          <h2>Centre Dashboard</h2>
+          <button id="refreshSummaryBtn" type="button">Refresh Summary</button>
+          <table id="centreTable">
+            <thead><tr><th>Budget Head</th><th>Sanctioned</th><th>Spent</th><th>Remaining</th><th>%</th></tr></thead>
+            <tbody></tbody>
+          </table>
+        </section>
 
-      <section id="fellow" class="panel section">
-        <h2>Fellow Subgrant Overview</h2>
-        <p>Placeholder section for fellow-specific analytics.</p>
-      </section>
+        <section id="master" class="view card">
+          <h2>Master Data</h2>
+          <div class="panel-grid">
+            <div class="subcard">
+              <h3>Accounts</h3>
+              <div class="grid2">
+                <input id="accountCode" placeholder="Code" />
+                <input id="accountName" placeholder="Name" />
+                <select id="accountType"><option>ASSET</option><option>LIABILITY</option><option>EQUITY</option><option>INCOME</option><option>EXPENSE</option></select>
+              </div>
+              <div class="row"><button id="createAccountBtn">Add Account</button><button id="loadAccountsBtn">List</button></div>
+            </div>
 
-      <section id="calendar" class="panel section">
-        <h2>Calendar & Event Workflow</h2>
-        <p>Create a sample event via <code>/events</code>.</p>
-        <button id="sampleEventBtn" type="button">Create Sample Event</button>
-        <pre id="eventResult"></pre>
-      </section>
+            <div class="subcard">
+              <h3>Projects</h3>
+              <div class="grid2">
+                <input id="projectCode" placeholder="Code" />
+                <input id="projectName" placeholder="Name" />
+              </div>
+              <div class="row"><button id="createProjectBtn">Add Project</button><button id="loadProjectsBtn">List</button></div>
+            </div>
 
-      <section id="reports" class="panel section">
-        <h2>Reports & Templates</h2>
-        <textarea id="templateJson" rows="5">{"sections":[{"title":"Grant Summary"}]}</textarea>
-        <textarea id="templateHtml" rows="5"><h1>{{ project_name }}</h1><p>Total spent: {{ total_spent }}</p></textarea>
-        <div class="filters">
-          <button id="saveTemplateBtn" type="button">Save Template</button>
-          <button id="loadTemplatesBtn" type="button">List Templates</button>
-        </div>
-        <pre id="templateResult"></pre>
-      </section>
+            <div class="subcard">
+              <h3>Budget Heads</h3>
+              <div class="grid2">
+                <input id="headCode" placeholder="Code" />
+                <input id="headName" placeholder="Name" />
+                <input id="headProjectId" type="number" placeholder="Project ID (optional)" />
+                <input id="headAmount" type="number" step="0.01" placeholder="Sanctioned amount" />
+              </div>
+              <div class="row"><button id="createHeadBtn">Add Head</button><button id="loadHeadsBtn">List</button></div>
+            </div>
 
-      <section id="users" class="panel section">
-        <h2>Users</h2>
-        <div class="filters">
-          <label>Name <input id="userName" placeholder="Full name" /></label>
-          <label>Email <input id="userEmail" type="email" placeholder="email@example.com" /></label>
-          <label>Password <input id="userPassword" type="password" placeholder="Password" /></label>
-          <label>Role
-            <select id="userRole">
-              <option>COORDINATOR</option><option>FINANCE</option><option>FELLOW</option><option>AUDITOR</option>
-            </select>
-          </label>
-          <button id="createUserBtn" type="button">Create User</button>
-          <button id="loadUsersBtn" type="button">Refresh Users</button>
-        </div>
-        <pre id="userActionResult"></pre>
-        <table id="usersTable"><thead><tr><th>ID</th><th>Name</th><th>Email</th><th>Role</th></tr></thead><tbody></tbody></table>
-      </section>
+            <div class="subcard">
+              <h3>Bank Accounts</h3>
+              <div class="grid2">
+                <input id="bankName" placeholder="Bank name" />
+                <input id="bankNumber" placeholder="Masked account number" />
+              </div>
+              <div class="row"><button id="createBankBtn">Add Bank</button><button id="listBankBtn">List</button></div>
+            </div>
+          </div>
+          <pre id="masterResult"></pre>
+        </section>
 
-      <section id="ops" class="panel section">
-        <h2>Operations Console (Router Test UI)</h2>
-        <p>These forms are direct frontend controls for backend routers/services.</p>
+        <section id="users" class="view card">
+          <h2>Users</h2>
+          <div class="grid2">
+            <input id="userName" placeholder="Name" />
+            <input id="userEmail" type="email" placeholder="Email" />
+            <input id="userPassword" type="password" placeholder="Password" />
+            <select id="userRole"><option>COORDINATOR</option><option>FINANCE</option><option>FELLOW</option><option>AUDITOR</option></select>
+          </div>
+          <div class="row"><button id="createUserBtn">Add User</button><button id="loadUsersBtn">Refresh Users</button></div>
+          <pre id="userActionResult"></pre>
+          <table id="usersTable"><thead><tr><th>ID</th><th>Name</th><th>Email</th><th>Role</th></tr></thead><tbody></tbody></table>
+        </section>
 
-        <h3>Master Data</h3>
-        <div class="filters">
-          <label>Account Code <input id="accountCode" placeholder="EXP-001" /></label>
-          <label>Account Name <input id="accountName" placeholder="Workshops Expense" /></label>
-          <label>Type
-            <select id="accountType"><option>ASSET</option><option>LIABILITY</option><option>EQUITY</option><option>INCOME</option><option>EXPENSE</option></select>
-          </label>
-          <button id="createAccountBtn" type="button">Create Account</button>
-          <button id="loadAccountsBtn" type="button">List Accounts</button>
-        </div>
+        <section id="events" class="view card">
+          <h2>Calendar & Events</h2>
+          <div class="grid2">
+            <input id="eventTitle" placeholder="Event title" />
+            <input id="eventDesc" placeholder="Description" />
+          </div>
+          <div class="row"><button id="createEventBtn">Create Event</button><button id="loadEventsBtn">List Events</button></div>
+          <pre id="eventResult"></pre>
+        </section>
 
-        <div class="filters">
-          <label>Project Code <input id="projectCode" placeholder="FEL-A" /></label>
-          <label>Project Name <input id="projectName" placeholder="Fellow A Project" /></label>
-          <button id="createProjectBtn" type="button">Create Project</button>
-          <button id="loadProjectsBtn" type="button">List Projects</button>
-        </div>
+        <section id="transactions" class="view card">
+          <h2>Transactions</h2>
+          <input id="txnNarration" placeholder="Narration" value="Sample transaction" />
+          <textarea id="txnLines" rows="5">[{"account_id":1,"entry_type":"DEBIT","amount":1000},{"account_id":2,"entry_type":"CREDIT","amount":1000}]</textarea>
+          <div class="row"><button id="createTxnBtn">Post Transaction</button><button id="listTxnBtn">List Transactions</button></div>
+          <pre id="txnResult"></pre>
+        </section>
 
-        <div class="filters">
-          <label>Head Code <input id="headCode" placeholder="BH-001" /></label>
-          <label>Head Name <input id="headName" placeholder="Workshops & Training" /></label>
-          <label>Project ID <input id="headProjectId" type="number" placeholder="optional" /></label>
-          <label>Sanctioned <input id="headAmount" type="number" step="0.01" value="0" /></label>
-          <button id="createHeadBtn" type="button">Create Budget Head</button>
-          <button id="loadHeadsBtn" type="button">List Budget Heads</button>
-        </div>
-
-        <h3>Transactions</h3>
-        <p>Provide JSON line items with balanced debit/credit.</p>
-        <textarea id="txnLines" rows="5">[{"account_id":1,"entry_type":"DEBIT","amount":1000},{"account_id":2,"entry_type":"CREDIT","amount":1000}]</textarea>
-        <div class="filters">
-          <label>Narration <input id="txnNarration" value="Sample transaction" /></label>
-          <button id="createTxnBtn" type="button">Create Transaction</button>
-          <button id="listTxnBtn" type="button">List Transactions</button>
-        </div>
-
-        <h3>Bank</h3>
-        <div class="filters">
-          <label>Bank Name <input id="bankName" value="Test Bank" /></label>
-          <label>Account Masked <input id="bankNumber" value="XXXX1234" /></label>
-          <button id="createBankBtn" type="button">Create Bank Account</button>
-          <button id="listBankBtn" type="button">List Bank Accounts</button>
-        </div>
-
-        <pre id="opsResult"></pre>
-      </section>
+        <section id="reports" class="view card">
+          <h2>Reports & Templates</h2>
+          <input id="templateName" value="UC Basic Template" />
+          <textarea id="templateJson" rows="4">{"sections":[{"title":"Grant Summary"}]}</textarea>
+          <textarea id="templateHtml" rows="4"><h1>{{ project_name }}</h1><p>Total spent: {{ total_spent }}</p></textarea>
+          <div class="row"><button id="saveTemplateBtn">Save Template</button><button id="loadTemplatesBtn">List Templates</button></div>
+          <pre id="templateResult"></pre>
+        </section>
+      </main>
     </div>
 
     <script src="app.js"></script>
