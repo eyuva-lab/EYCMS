@@ -72,6 +72,8 @@ uvicorn app.main:app --reload
 
 Open `http://127.0.0.1:8000` for dashboard UI and `http://127.0.0.1:8000/docs` for Swagger.
 
+Default seeded Coordinator on first run: `coordinator@eyuva.local` / `admin123`.
+
 
 ### Windows (PowerShell)
 
@@ -88,6 +90,7 @@ Then open `http://127.0.0.1:<number>` and `http://127.0.0.1:<number>/docs`.
 
 ## UI notes
 
+- Day 3-4 sprint adds Home setup checklist + role-aware navigation + default coordinator/centre seeding.
 - Day 1-2 sprint adds CRUD-style UI actions (create/list/edit/delete) for Users and Master Data (accounts/projects/budget heads).
 - Use **Login** first; after login the app hides the login card and shows your profile badge.
 - Use **Logout** button in the top-right to clear token/session from browser storage.

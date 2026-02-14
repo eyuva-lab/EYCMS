@@ -126,3 +126,18 @@ def delete_budget_head(head_id: int, db: Session = Depends(get_db), _: User = De
     db.delete(head)
     db.commit()
     return {"status": "deleted"}
+
+
+@router.get("/setup-status")
+def setup_status(db: Session = Depends(get_db), _: User = Depends(get_current_user)):
+    users_count = db.query(User).count()
+    projects_count = db.query(Project).count()
+    heads_count = db.query(BudgetHead).count()
+    accounts_count = db.query(Account).count()
+
+    return {
+        "users": {"count": users_count, "done": users_count >= 2},
+        "projects": {"count": projects_count, "done": projects_count >= 1},
+        "budget_heads": {"count": heads_count, "done": heads_count >= 1},
+        "accounts": {"count": accounts_count, "done": accounts_count >= 1},
+    }

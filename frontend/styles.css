@@ -23,3 +23,6 @@ button.ghost { background: transparent; border-color:#ffffff77; }
 table { width:100%; border-collapse: collapse; margin-top: 8px; font-size: 13px; }
 th, td { border-bottom:1px solid #e5e7eb; padding:6px; text-align:left; }
 pre { background:#f8fafc; border:1px solid #e5e7eb; border-radius: 8px; padding:8px; min-height: 52px; white-space: pre-wrap; }
+
+.checklist { padding-left: 18px; margin: 6px 0 10px; }
+.checklist li { margin: 4px 0; }

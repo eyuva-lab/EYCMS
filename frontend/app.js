@@ -20,15 +20,40 @@ function setLoggedIn(name, role) {
   loginCard.style.display = 'none';
 }
 
+function activateView(viewId) {
+  document.querySelectorAll('.nav-btn').forEach((x) => x.classList.remove('active'));
+  document.querySelectorAll('.view').forEach((v) => v.classList.remove('active'));
+  const navBtn = document.querySelector(`.nav-btn[data-view="${viewId}"]`);
+  if (navBtn) navBtn.classList.add('active');
+  const view = document.getElementById(viewId);
+  if (view) view.classList.add('active');
+}
+
 function setupNav() {
   document.querySelectorAll('.nav-btn').forEach((btn) => {
-    btn.addEventListener('click', () => {
-      document.querySelectorAll('.nav-btn').forEach((x) => x.classList.remove('active'));
-      document.querySelectorAll('.view').forEach((v) => v.classList.remove('active'));
-      btn.classList.add('active');
-      document.getElementById(btn.dataset.view).classList.add('active');
-    });
+    btn.addEventListener('click', () => activateView(btn.dataset.view));
   });
+}
+
+function applyRoleUI(role) {
+  [navUsers, navMaster, navEvents, navTransactions, navReports].forEach((x) => (x.style.display = ''));
+  if (role === 'FELLOW') {
+    navUsers.style.display = 'none';
+  }
+  if (role === 'AUDITOR') {
+    navUsers.style.display = 'none';
+    navMaster.style.display = 'none';
+    navTransactions.style.display = 'none';
+  }
+}
+
+async function refreshSetupStatus() {
+  const { res, data } = await call('/master/setup-status');
+  if (!res.ok) return;
+  stepUsers.innerText = `Users: ${data.users.done ? 'done' : 'pending'} (${data.users.count})`;
+  stepProjects.innerText = `Projects/Fellows: ${data.projects.done ? 'done' : 'pending'} (${data.projects.count})`;
+  stepHeads.innerText = `Budget Heads: ${data.budget_heads.done ? 'done' : 'pending'} (${data.budget_heads.count})`;
+  stepAccounts.innerText = `Accounts & Bank: ${data.accounts.done ? 'done' : 'pending'} (${data.accounts.count})`;
 }
 
 async function login() {
@@ -39,12 +64,18 @@ async function login() {
   localStorage.setItem('token', token);
   await loadProfile();
 }
-function logout() { token = ''; localStorage.removeItem('token'); setLoggedOut(); }
+function logout() {
+  token = '';
+  localStorage.removeItem('token');
+  setLoggedOut();
+  [navUsers, navMaster, navEvents, navTransactions, navReports].forEach((x) => (x.style.display = ''));
+}
 async function loadProfile() {
   if (!token) return setLoggedOut();
   const { res, data } = await call('/auth/me');
   if (!res.ok) return logout();
   setLoggedIn(data.name, data.role);
+  applyRoleUI(data.role);
 }
 
 async function loadCentreSummary() {
@@ -207,6 +238,7 @@ document.addEventListener('click', (e) => {
 });
 
 loginBtn.onclick = login; logoutBtn.onclick = logout; refreshSummaryBtn.onclick = loadCentreSummary;
+refreshSetupBtn.onclick = refreshSetupStatus; goUsersBtn.onclick = () => activateView('users'); goMasterBtn.onclick = () => activateView('master');
 createAccountBtn.onclick = createAccount; loadAccountsBtn.onclick = listAccounts;
 createProjectBtn.onclick = createProject; loadProjectsBtn.onclick = listProjects;
 createHeadBtn.onclick = createHead; loadHeadsBtn.onclick = listHeads;
@@ -218,3 +250,4 @@ createTxnBtn.onclick = createTxn; listTxnBtn.onclick = listTxn;
 
 setupNav();
 loadProfile();
+refreshSetupStatus();

@@ -30,16 +30,28 @@
     <div class="app-shell">
       <aside class="sidebar">
         <button class="nav-btn active" data-view="dashboard">Dashboard</button>
-        <button class="nav-btn" data-view="master">Master Data</button>
-        <button class="nav-btn" data-view="users">Users</button>
-        <button class="nav-btn" data-view="events">Calendar & Events</button>
-        <button class="nav-btn" data-view="transactions">Transactions</button>
-        <button class="nav-btn" data-view="reports">Reports & Templates</button>
+        <button id="navMaster" class="nav-btn" data-view="master">Master Data</button>
+        <button id="navUsers" class="nav-btn" data-view="users">Users</button>
+        <button id="navEvents" class="nav-btn" data-view="events">Calendar & Events</button>
+        <button id="navTransactions" class="nav-btn" data-view="transactions">Transactions</button>
+        <button id="navReports" class="nav-btn" data-view="reports">Reports & Templates</button>
       </aside>
 
       <main class="content">
         <section id="dashboard" class="view active card">
-          <h2>Centre Dashboard</h2>
+          <h2>Home / Dashboard</h2>
+          <p><strong>Finish setup in 4 steps:</strong> Users → Projects/Fellows → Budget Heads → Accounts & Bank.</p>
+          <ul id="setupChecklist" class="checklist">
+            <li id="stepUsers">Users: pending</li>
+            <li id="stepProjects">Projects/Fellows: pending</li>
+            <li id="stepHeads">Budget Heads: pending</li>
+            <li id="stepAccounts">Accounts & Bank: pending</li>
+          </ul>
+          <div class="row">
+            <button id="goUsersBtn" type="button">Go to Users</button>
+            <button id="goMasterBtn" type="button">Go to Master Data</button>
+            <button id="refreshSetupBtn" type="button">Refresh Setup Status</button>
+          </div>
           <button id="refreshSummaryBtn" type="button">Refresh Summary</button>
           <table id="centreTable">
             <thead><tr><th>Budget Head</th><th>Sanctioned</th><th>Spent</th><th>Remaining</th><th>%</th></tr></thead>
