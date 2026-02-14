@@ -24,15 +24,30 @@ class UserOut(BaseModel):
     name: str
     email: EmailStr
     role: UserRole
+    is_active: bool
 
     class Config:
         from_attributes = True
+
+
+class UserUpdate(BaseModel):
+    name: str | None = None
+    email: EmailStr | None = None
+    password: str | None = None
+    role: UserRole | None = None
+    is_active: bool | None = None
 
 
 class AccountCreate(BaseModel):
     code: str
     name: str
     account_type: AccountType
+
+
+class AccountUpdate(BaseModel):
+    code: str | None = None
+    name: str | None = None
+    account_type: AccountType | None = None
 
 
 class ProjectCreate(BaseModel):
@@ -43,11 +58,26 @@ class ProjectCreate(BaseModel):
     owner_user_id: int | None = None
 
 
+class ProjectUpdate(BaseModel):
+    code: str | None = None
+    name: str | None = None
+    description: str | None = None
+    is_centre_project: bool | None = None
+    owner_user_id: int | None = None
+
+
 class BudgetHeadCreate(BaseModel):
     code: str
     name: str
     project_id: int | None = None
     sanctioned_amount: Decimal = Decimal("0")
+
+
+class BudgetHeadUpdate(BaseModel):
+    code: str | None = None
+    name: str | None = None
+    project_id: int | None = None
+    sanctioned_amount: Decimal | None = None
 
 
 class TransactionLineIn(BaseModel):

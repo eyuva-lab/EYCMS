@@ -88,6 +88,7 @@ Then open `http://127.0.0.1:<number>` and `http://127.0.0.1:<number>/docs`.
 
 ## UI notes
 
+- Day 1-2 sprint adds CRUD-style UI actions (create/list/edit/delete) for Users and Master Data (accounts/projects/budget heads).
 - Use **Login** first; after login the app hides the login card and shows your profile badge.
 - Use **Logout** button in the top-right to clear token/session from browser storage.
 - **Users** tab lets coordinator/finance create users and refresh user list.
