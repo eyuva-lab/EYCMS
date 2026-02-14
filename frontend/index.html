@@ -14,6 +14,7 @@
       </div>
       <div class="profile-wrap">
         <div id="profile" class="badge">Not logged in</div>
+        <button id="logoutBtn" type="button" class="ghost">Logout</button>
       </div>
     </header>
 
@@ -32,6 +33,7 @@
         <button class="tab" data-target="fellow">Fellow Dashboard</button>
         <button class="tab" data-target="calendar">Calendar & Events</button>
         <button class="tab" data-target="reports">Reports & Templates</button>
+        <button class="tab" data-target="users">Users</button>
       </nav>
 
       <section id="centre" class="panel section active">
@@ -44,22 +46,6 @@
         <div class="filters">
           <label>From: <input type="date" value="2022-05-02" /></label>
           <label>To: <input type="date" value="2025-04-05" /></label>
-          <label>
-            View:
-            <select>
-              <option>All heads</option>
-              <option>Non-recurring</option>
-              <option>Recurring</option>
-            </select>
-          </label>
-          <label>
-            Chart type:
-            <select>
-              <option>Bar</option>
-              <option>Line</option>
-              <option>Pie</option>
-            </select>
-          </label>
           <button id="refreshSummaryBtn" type="button">Refresh from API</button>
         </div>
 
@@ -75,8 +61,6 @@
           </thead>
           <tbody>
             <tr><td>Fellowships – E-YUVA & Innovation</td><td>₹ 1,20,00,000</td><td>₹ 72,00,000</td><td>₹ 48,00,000</td><td>60%</td></tr>
-            <tr><td>Workshops & Training</td><td>₹ 20,00,000</td><td>₹ 9,50,000</td><td>₹ 10,50,000</td><td>47.5%</td></tr>
-            <tr><td>Travel – Fellows & Staff</td><td>₹ 10,00,000</td><td>₹ 3,20,000</td><td>₹ 6,80,000</td><td>32%</td></tr>
           </tbody>
         </table>
       </section>
@@ -84,19 +68,11 @@
       <section id="fellow" class="panel section">
         <h2>Fellow Subgrant Overview</h2>
         <p>Project-level subgrant tracking with head-wise budgets, burn-rate, and reconciliation.</p>
-        <table>
-          <thead><tr><th>Fellow Budget Head</th><th>Sanctioned</th><th>Spent</th><th>Remaining</th></tr></thead>
-          <tbody>
-            <tr><td>Prototype Materials & Lab Consumables</td><td>₹ 3,00,000</td><td>₹ 1,80,000</td><td>₹ 1,20,000</td></tr>
-            <tr><td>Market Research & Pilots</td><td>₹ 1,50,000</td><td>₹ 70,000</td><td>₹ 80,000</td></tr>
-          </tbody>
-        </table>
       </section>
 
       <section id="calendar" class="panel section">
         <h2>Calendar & Event Workflow</h2>
         <p>Plan events, request prior approvals, and upload post-event evidence.</p>
-        <div class="chart-card">Monthly calendar placeholder (click date → create event)</div>
         <button id="sampleEventBtn" type="button">Create Sample Event</button>
         <pre id="eventResult"></pre>
       </section>
@@ -104,15 +80,37 @@
       <section id="reports" class="panel section">
         <h2>Reports & Templates</h2>
         <p>Generate BIRAC UC/SoE and activity summaries from reusable templates.</p>
-        <div class="filters">
-          <label>From: <input type="date" value="2024-04-01" /></label>
-          <label>To: <input type="date" value="2025-03-31" /></label>
-        </div>
         <h3>Template editor</h3>
         <textarea id="templateJson" rows="6">{"sections":[{"title":"Grant Summary"}]}</textarea>
         <textarea id="templateHtml" rows="6"><h1>{{ project_name }}</h1><p>Total spent: {{ total_spent }}</p></textarea>
         <button id="saveTemplateBtn" type="button">Save Template</button>
         <pre id="templateResult"></pre>
+      </section>
+
+      <section id="users" class="panel section">
+        <h2>Users</h2>
+        <p>Create and list users (Coordinator/Finance roles can create users).</p>
+        <div class="filters">
+          <label>Name <input id="userName" placeholder="Full name" /></label>
+          <label>Email <input id="userEmail" type="email" placeholder="email@example.com" /></label>
+          <label>Password <input id="userPassword" type="password" placeholder="Password" /></label>
+          <label>
+            Role
+            <select id="userRole">
+              <option>COORDINATOR</option>
+              <option>FINANCE</option>
+              <option>FELLOW</option>
+              <option>AUDITOR</option>
+            </select>
+          </label>
+          <button id="createUserBtn" type="button">Create User</button>
+          <button id="loadUsersBtn" type="button">Refresh Users</button>
+        </div>
+        <pre id="userActionResult"></pre>
+        <table id="usersTable">
+          <thead><tr><th>ID</th><th>Name</th><th>Email</th><th>Role</th></tr></thead>
+          <tbody></tbody>
+        </table>
       </section>
     </div>
 

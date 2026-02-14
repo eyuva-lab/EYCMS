@@ -5,6 +5,15 @@ function authHeaders() {
   return token ? { Authorization: `Bearer ${token}` } : {};
 }
 
+function setLoggedOutUI() {
+  document.getElementById('profile').innerText = 'Not logged in';
+  document.getElementById('loginCard').style.display = 'block';
+}
+
+function setLoggedInUI() {
+  document.getElementById('loginCard').style.display = 'none';
+}
+
 function setupTabs() {
   const tabs = document.querySelectorAll('.tab');
   const panels = document.querySelectorAll('.panel');
@@ -17,6 +26,12 @@ function setupTabs() {
       document.getElementById(tab.dataset.target).classList.add('active');
     });
   });
+}
+
+function logout() {
+  token = '';
+  localStorage.removeItem('token');
+  setLoggedOutUI();
 }
 
 async function login() {
@@ -35,15 +50,22 @@ async function login() {
   }
   token = data.access_token;
   localStorage.setItem('token', token);
-  loadProfile();
+  await loadProfile();
 }
 
 async function loadProfile() {
-  if (!token) return;
+  if (!token) {
+    setLoggedOutUI();
+    return;
+  }
   const res = await fetch(`${api}/auth/me`, { headers: authHeaders() });
-  if (!res.ok) return;
+  if (!res.ok) {
+    logout();
+    return;
+  }
   const me = await res.json();
   document.getElementById('profile').innerText = `${me.name} (${me.role})`;
+  setLoggedInUI();
 }
 
 async function loadCentreSummary() {
@@ -93,9 +115,51 @@ async function createTemplate() {
   document.getElementById('templateResult').innerText = JSON.stringify(await res.json(), null, 2);
 }
 
+async function loadUsers() {
+  const res = await fetch(`${api}/users`, { headers: authHeaders() });
+  const data = await res.json();
+  const tbody = document.querySelector('#usersTable tbody');
+  tbody.innerHTML = '';
+
+  if (!res.ok) {
+    document.getElementById('userActionResult').innerText = data.detail || 'Could not load users';
+    return;
+  }
+
+  data.forEach((u) => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td>${u.id}</td><td>${u.name}</td><td>${u.email}</td><td>${u.role}</td>`;
+    tbody.appendChild(tr);
+  });
+}
+
+async function createUser() {
+  const payload = {
+    name: document.getElementById('userName').value,
+    email: document.getElementById('userEmail').value,
+    password: document.getElementById('userPassword').value,
+    role: document.getElementById('userRole').value,
+  };
+  const res = await fetch(`${api}/users`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...authHeaders() },
+    body: JSON.stringify(payload),
+  });
+  const data = await res.json();
+  document.getElementById('userActionResult').innerText = JSON.stringify(data, null, 2);
+  if (res.ok) {
+    document.getElementById('userPassword').value = '';
+    await loadUsers();
+  }
+}
+
 document.getElementById('loginBtn').addEventListener('click', login);
+document.getElementById('logoutBtn').addEventListener('click', logout);
 document.getElementById('refreshSummaryBtn').addEventListener('click', loadCentreSummary);
 document.getElementById('sampleEventBtn').addEventListener('click', createSampleEvent);
 document.getElementById('saveTemplateBtn').addEventListener('click', createTemplate);
+document.getElementById('loadUsersBtn').addEventListener('click', loadUsers);
+document.getElementById('createUserBtn').addEventListener('click', createUser);
+
 setupTabs();
 loadProfile();

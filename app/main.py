@@ -5,7 +5,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 
 from .database import Base, engine
-from .routers import auth, bank, events, master_data, reports, transactions
+from .routers import auth, bank, events, master_data, reports, transactions, users
 
 Base.metadata.create_all(bind=engine)
 
@@ -25,6 +25,7 @@ app.include_router(transactions.router)
 app.include_router(bank.router)
 app.include_router(events.router)
 app.include_router(reports.router)
+app.include_router(users.router)
 
 frontend_dir = Path(__file__).resolve().parent.parent / "frontend"
 if frontend_dir.exists():

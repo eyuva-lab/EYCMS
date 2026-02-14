@@ -68,6 +68,8 @@ pip install -r requirements.txt
 uvicorn app.main:app --reload
 ```
 
+> If you hit bcrypt/passlib errors on Windows, ensure `bcrypt==4.0.1` is installed (pinned in requirements).
+
 Open `http://127.0.0.1:8000` for dashboard UI and `http://127.0.0.1:8000/docs` for Swagger.
 
 
@@ -82,3 +84,10 @@ uvicorn app.main:app --reload --port 8010
 
 You can change the port (for example if 8000 is already used) with `--port <number>`.
 Then open `http://127.0.0.1:<number>` and `http://127.0.0.1:<number>/docs`.
+
+
+## UI notes
+
+- Use **Login** first; after login the app hides the login card and shows your profile badge.
+- Use **Logout** button in the top-right to clear token/session from browser storage.
+- **Users** tab lets coordinator/finance create users and refresh user list.

@@ -13,6 +13,7 @@ header {
   gap: 16px;
   align-items: center;
 }
+.profile-wrap { display: flex; align-items: center; gap: 8px; }
 header h1 { margin: 0; font-size: 20px; }
 header p { margin: 4px 0 0; font-size: 13px; opacity: 0.9; }
 .container { padding: 16px 24px 32px; }
@@ -41,7 +42,9 @@ header p { margin: 4px 0 0; font-size: 13px; opacity: 0.9; }
 .filters label { display: flex; align-items: center; gap: 6px; }
 input, select, textarea, button { font-size: 13px; padding: 6px 8px; }
 textarea { width: 100%; margin-bottom: 8px; }
-button { cursor: pointer; }
+button { cursor: pointer; border: 1px solid #225188; background: #2d5aa3; color: #fff; border-radius: 6px; }
+button.ghost { background: transparent; border-color: #ffffff66; }
+button:disabled { opacity: 0.5; cursor: not-allowed; }
 table { width: 100%; border-collapse: collapse; font-size: 13px; margin-top: 8px; }
 th, td { padding: 6px 8px; border-bottom: 1px solid #eee; text-align: right; }
 th:first-child, td:first-child { text-align: left; }
@@ -53,18 +56,5 @@ th { background: #f3f3f6; font-weight: 600; }
   font-size: 11px;
   background: #eef4ff;
   color: #1f4f7b;
-}
-.chart-card {
-  min-height: 120px;
-  border-radius: 8px;
-  border: 1px dashed #ccc;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #888;
-  background: #fafafa;
-  text-align: center;
-  padding: 8px;
-  margin-bottom: 8px;
 }
 pre { white-space: pre-wrap; font-size: 12px; background: #f7f7f8; padding: 8px; border-radius: 6px; }
