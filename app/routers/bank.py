@@ -2,21 +2,30 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
 from app.deps import get_current_user, get_db
-from app.models import BankAccount, BankStatementLine, Transaction, User
+from app.models import BankAccount, BankStatementLine, Project, Transaction, User, UserRole
 from app.schemas import BankStatementImportRow
 
 router = APIRouter(prefix="/bank", tags=["bank"])
 
 
-
-
 @router.get("/accounts")
-def list_bank_accounts(db: Session = Depends(get_db), _: User = Depends(get_current_user)):
-    return db.query(BankAccount).order_by(BankAccount.id.asc()).all()
+def list_bank_accounts(db: Session = Depends(get_db), user: User = Depends(get_current_user)):
+    q = db.query(BankAccount)
+    if user.role == UserRole.fellow:
+        q = q.join(Project, BankAccount.project_id == Project.id).filter(Project.owner_user_id == user.id)
+    return q.order_by(BankAccount.id.asc()).all()
 
 
 @router.get("/statements/{bank_account_id}")
-def list_statement_lines(bank_account_id: int, db: Session = Depends(get_db), _: User = Depends(get_current_user)):
+def list_statement_lines(bank_account_id: int, db: Session = Depends(get_db), user: User = Depends(get_current_user)):
+    account = db.get(BankAccount, bank_account_id)
+    if not account:
+        raise HTTPException(status_code=404, detail="Bank account not found")
+    if user.role == UserRole.fellow:
+        project = db.get(Project, account.project_id) if account.project_id else None
+        if not project or project.owner_user_id != user.id:
+            raise HTTPException(status_code=403, detail="Fellow can view own bank statements only")
+
     return (
         db.query(BankStatementLine)
         .filter(BankStatementLine.bank_account_id == bank_account_id)
@@ -24,8 +33,11 @@ def list_statement_lines(bank_account_id: int, db: Session = Depends(get_db), _:
         .all()
     )
 
+
 @router.post("/accounts")
 def create_bank_account(payload: dict, db: Session = Depends(get_db), user: User = Depends(get_current_user)):
+    if user.role in {UserRole.auditor, UserRole.fellow}:
+        raise HTTPException(status_code=403, detail="Only coordinator/finance can create bank accounts")
     account = BankAccount(**payload, created_by_id=user.id, updated_by_id=user.id)
     db.add(account)
     db.commit()
@@ -40,6 +52,8 @@ def import_statement(
     db: Session = Depends(get_db),
     user: User = Depends(get_current_user),
 ):
+    if user.role in {UserRole.auditor, UserRole.fellow}:
+        raise HTTPException(status_code=403, detail="Only coordinator/finance can import statements")
     for row in rows:
         line = BankStatementLine(
             bank_account_id=bank_account_id,
@@ -57,8 +71,10 @@ def reconcile(
     statement_line_id: int,
     transaction_id: int,
     db: Session = Depends(get_db),
-    _: User = Depends(get_current_user),
+    user: User = Depends(get_current_user),
 ):
+    if user.role in {UserRole.auditor, UserRole.fellow}:
+        raise HTTPException(status_code=403, detail="Only coordinator/finance can reconcile")
     line = db.get(BankStatementLine, statement_line_id)
     txn = db.get(Transaction, transaction_id)
     if not line or not txn:

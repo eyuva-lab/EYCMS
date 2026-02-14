@@ -90,9 +90,21 @@ Then open `http://127.0.0.1:<number>` and `http://127.0.0.1:<number>/docs`.
 
 ## UI notes
 
+- Day 5-6 sprint adds operational UI for transactions, bank reconciliation, events approvals, report generation, and role-aware edit safety.
 - Day 3-4 sprint adds Home setup checklist + role-aware navigation + default coordinator/centre seeding.
 - Day 1-2 sprint adds CRUD-style UI actions (create/list/edit/delete) for Users and Master Data (accounts/projects/budget heads).
 - Use **Login** first; after login the app hides the login card and shows your profile badge.
 - Use **Logout** button in the top-right to clear token/session from browser storage.
 - **Users** tab lets coordinator/finance create users and refresh user list.
 - UI now includes an ERP-style workspace with module navigation: Dashboard, Master Data, Users, Calendar & Events, Transactions, and Reports & Templates.
+
+
+## Demo data quick start
+
+1. Login with `coordinator@eyuva.local` / `admin123`.
+2. Create one Finance user and one Fellow user in **Users**.
+3. In **Master Data**, create at least 2 Accounts, 1 Fellow Project, and 2 Budget Heads.
+4. In **Transactions**, add two balanced lines and run **Check Budget Warning** before posting.
+5. In **Transactions → Bank Reconciliation**, create a bank account, import sample statement JSON, and reconcile with a transaction id.
+6. In **Events**, create event + generate prior approval using a prior-approval template id.
+7. In **Reports**, save template, generate report, and download HTML.

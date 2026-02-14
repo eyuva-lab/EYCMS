@@ -71,6 +71,7 @@ def delete_user(user_id: int, db: Session = Depends(get_db), current: User = Dep
     user = db.get(User, user_id)
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
-    db.delete(user)
+    user.is_active = False
+    user.updated_by_id = current.id
     db.commit()
-    return {"status": "deleted"}
+    return {"status": "deactivated"}

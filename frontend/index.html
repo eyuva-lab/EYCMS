@@ -10,7 +10,7 @@
     <header class="topbar">
       <div>
         <h1>E-YUVA Grant ERP Workspace</h1>
-        <p>Manage accounts, projects, users, events, templates, and transactions in one interface.</p>
+        <p>Daily operations: transactions, reconciliation, event approvals, and reporting.</p>
       </div>
       <div class="top-actions">
         <span id="profile" class="badge">Not logged in</span>
@@ -52,7 +52,7 @@
             <button id="goMasterBtn" type="button">Go to Master Data</button>
             <button id="refreshSetupBtn" type="button">Refresh Setup Status</button>
           </div>
-          <button id="refreshSummaryBtn" type="button">Refresh Summary</button>
+          <button id="refreshSummaryBtn" type="button">Refresh Centre Summary</button>
           <table id="centreTable">
             <thead><tr><th>Budget Head</th><th>Sanctioned</th><th>Spent</th><th>Remaining</th><th>%</th></tr></thead>
             <tbody></tbody>
@@ -94,15 +94,6 @@
               <div class="row"><button id="createHeadBtn">Add Head</button><button id="loadHeadsBtn">Refresh</button></div>
               <table id="headsTable"><thead><tr><th>ID</th><th>Code</th><th>Name</th><th>Project</th><th>Sanctioned</th><th>Actions</th></tr></thead><tbody></tbody></table>
             </div>
-
-            <div class="subcard">
-              <h3>Bank Accounts</h3>
-              <div class="grid2">
-                <input id="bankName" placeholder="Bank name" />
-                <input id="bankNumber" placeholder="Masked account number" />
-              </div>
-              <div class="row"><button id="createBankBtn">Add Bank</button><button id="listBankBtn">Refresh</button></div>
-            </div>
           </div>
           <pre id="masterResult"></pre>
         </section>
@@ -125,26 +116,75 @@
           <div class="grid2">
             <input id="eventTitle" placeholder="Event title" />
             <input id="eventDesc" placeholder="Description" />
+            <input id="eventProjectId" type="number" placeholder="Project ID" />
+            <input id="eventHeadId" type="number" placeholder="Budget Head ID" />
           </div>
           <div class="row"><button id="createEventBtn">Create Event</button><button id="loadEventsBtn">List Events</button></div>
+          <div class="row">
+            <input id="priorTemplateId" type="number" placeholder="Prior approval template ID" />
+            <input id="priorEventId" type="number" placeholder="Event ID" />
+            <button id="generatePriorBtn">Generate Prior Approval</button>
+          </div>
           <pre id="eventResult"></pre>
         </section>
 
         <section id="transactions" class="view card">
           <h2>Transactions</h2>
-          <input id="txnNarration" placeholder="Narration" value="Sample transaction" />
-          <textarea id="txnLines" rows="5">[{"account_id":1,"entry_type":"DEBIT","amount":1000},{"account_id":2,"entry_type":"CREDIT","amount":1000}]</textarea>
-          <div class="row"><button id="createTxnBtn">Post Transaction</button><button id="listTxnBtn">List Transactions</button></div>
+          <div class="row">
+            <input id="txnNarration" placeholder="Narration" value="Sample transaction" />
+            <input id="txnFromDate" type="date" />
+            <input id="txnToDate" type="date" />
+            <button id="listTxnBtn">Filter Transactions</button>
+            <button id="deleteLastTxnBtn">Undo Last Transaction</button>
+          </div>
+          <h3>Line Items</h3>
+          <table id="txnLinesTable">
+            <thead><tr><th>Account ID</th><th>Project ID</th><th>Budget Head ID</th><th>Entry</th><th>Amount</th><th></th></tr></thead>
+            <tbody></tbody>
+          </table>
+          <div class="row">
+            <button id="addTxnLineBtn">Add Line</button>
+            <button id="checkBudgetBtn">Check Budget Warning</button>
+            <button id="createTxnBtn">Post Transaction</button>
+          </div>
+          <pre id="txnWarningResult"></pre>
           <pre id="txnResult"></pre>
+
+          <h3>Bank Reconciliation</h3>
+          <div class="row">
+            <input id="bankName" placeholder="Bank name" />
+            <input id="bankNumber" placeholder="Masked account number" />
+            <button id="createBankBtn">Add Bank</button>
+            <button id="listBankBtn">Refresh Banks</button>
+            <select id="bankAccountSelect"></select>
+            <button id="loadStatementsBtn">Load Statements</button>
+          </div>
+          <div class="row">
+            <textarea id="statementRowsJson" rows="3">[{"statement_date":"2026-01-01T00:00:00","description":"Sample debit","debit":100,"credit":0,"closing_balance":900}]</textarea>
+            <button id="importStatementBtn">Import Statement JSON</button>
+          </div>
+          <table id="statementTable"><thead><tr><th>Line ID</th><th>Date</th><th>Description</th><th>Debit</th><th>Credit</th><th>Reconciled</th><th>Match Txn ID</th><th>Action</th></tr></thead><tbody></tbody></table>
         </section>
 
         <section id="reports" class="view card">
           <h2>Reports & Templates</h2>
           <input id="templateName" value="UC Basic Template" />
+          <select id="templateType"><option>UC</option><option>SoE</option><option>PriorApproval</option><option>EventReport</option><option>Newsletter</option></select>
           <textarea id="templateJson" rows="4">{"sections":[{"title":"Grant Summary"}]}</textarea>
           <textarea id="templateHtml" rows="4"><h1>{{ project_name }}</h1><p>Total spent: {{ total_spent }}</p></textarea>
           <div class="row"><button id="saveTemplateBtn">Save Template</button><button id="loadTemplatesBtn">List Templates</button></div>
+
+          <h3>Generate Report</h3>
+          <div class="row">
+            <input id="generateTemplateId" type="number" placeholder="Template ID" />
+            <input id="generateProjectId" type="number" placeholder="Project ID" />
+            <input id="generateFromDate" type="date" />
+            <input id="generateToDate" type="date" />
+            <button id="generateReportBtn">Generate</button>
+            <button id="downloadReportBtn">Download HTML</button>
+          </div>
           <pre id="templateResult"></pre>
+          <iframe id="reportPreview" style="width:100%;height:260px;border:1px solid #ddd;border-radius:6px;"></iframe>
         </section>
       </main>
     </div>

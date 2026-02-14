@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
 from app.deps import get_current_user, get_db
-from app.models import Account, BudgetHead, Project, User
+from app.models import Account, BudgetHead, Project, User, UserRole
 from app.schemas import (
     AccountCreate,
     AccountUpdate,
@@ -15,8 +15,14 @@ from app.schemas import (
 router = APIRouter(prefix="/master", tags=["master-data"])
 
 
+def ensure_admin(current: User):
+    if current.role not in {UserRole.coordinator, UserRole.finance}:
+        raise HTTPException(status_code=403, detail="Only coordinator/finance can change master data")
+
+
 @router.post("/accounts")
-def create_account(payload: AccountCreate, db: Session = Depends(get_db), _: User = Depends(get_current_user)):
+def create_account(payload: AccountCreate, db: Session = Depends(get_db), user: User = Depends(get_current_user)):
+    ensure_admin(user)
     account = Account(**payload.model_dump())
     db.add(account)
     db.commit()
@@ -30,7 +36,8 @@ def list_accounts(db: Session = Depends(get_db), _: User = Depends(get_current_u
 
 
 @router.put("/accounts/{account_id}")
-def update_account(account_id: int, payload: AccountUpdate, db: Session = Depends(get_db), _: User = Depends(get_current_user)):
+def update_account(account_id: int, payload: AccountUpdate, db: Session = Depends(get_db), user: User = Depends(get_current_user)):
+    ensure_admin(user)
     account = db.get(Account, account_id)
     if not account:
         raise HTTPException(status_code=404, detail="Account not found")
@@ -42,7 +49,8 @@ def update_account(account_id: int, payload: AccountUpdate, db: Session = Depend
 
 
 @router.delete("/accounts/{account_id}")
-def delete_account(account_id: int, db: Session = Depends(get_db), _: User = Depends(get_current_user)):
+def delete_account(account_id: int, db: Session = Depends(get_db), user: User = Depends(get_current_user)):
+    ensure_admin(user)
     account = db.get(Account, account_id)
     if not account:
         raise HTTPException(status_code=404, detail="Account not found")
@@ -53,6 +61,7 @@ def delete_account(account_id: int, db: Session = Depends(get_db), _: User = Dep
 
 @router.post("/projects")
 def create_project(payload: ProjectCreate, db: Session = Depends(get_db), user: User = Depends(get_current_user)):
+    ensure_admin(user)
     project = Project(**payload.model_dump(), created_by_id=user.id, updated_by_id=user.id)
     db.add(project)
     db.commit()
@@ -61,12 +70,16 @@ def create_project(payload: ProjectCreate, db: Session = Depends(get_db), user: 
 
 
 @router.get("/projects")
-def list_projects(db: Session = Depends(get_db), _: User = Depends(get_current_user)):
-    return db.query(Project).order_by(Project.id.asc()).all()
+def list_projects(db: Session = Depends(get_db), user: User = Depends(get_current_user)):
+    q = db.query(Project)
+    if user.role == UserRole.fellow:
+        q = q.filter(Project.owner_user_id == user.id)
+    return q.order_by(Project.id.asc()).all()
 
 
 @router.put("/projects/{project_id}")
 def update_project(project_id: int, payload: ProjectUpdate, db: Session = Depends(get_db), user: User = Depends(get_current_user)):
+    ensure_admin(user)
     project = db.get(Project, project_id)
     if not project:
         raise HTTPException(status_code=404, detail="Project not found")
@@ -79,7 +92,8 @@ def update_project(project_id: int, payload: ProjectUpdate, db: Session = Depend
 
 
 @router.delete("/projects/{project_id}")
-def delete_project(project_id: int, db: Session = Depends(get_db), _: User = Depends(get_current_user)):
+def delete_project(project_id: int, db: Session = Depends(get_db), user: User = Depends(get_current_user)):
+    ensure_admin(user)
     project = db.get(Project, project_id)
     if not project:
         raise HTTPException(status_code=404, detail="Project not found")
@@ -90,6 +104,7 @@ def delete_project(project_id: int, db: Session = Depends(get_db), _: User = Dep
 
 @router.post("/budget-heads")
 def create_budget_head(payload: BudgetHeadCreate, db: Session = Depends(get_db), user: User = Depends(get_current_user)):
+    ensure_admin(user)
     head = BudgetHead(**payload.model_dump(), created_by_id=user.id, updated_by_id=user.id)
     db.add(head)
     db.commit()
@@ -98,15 +113,18 @@ def create_budget_head(payload: BudgetHeadCreate, db: Session = Depends(get_db),
 
 
 @router.get("/budget-heads")
-def list_budget_heads(project_id: int | None = None, db: Session = Depends(get_db), _: User = Depends(get_current_user)):
+def list_budget_heads(project_id: int | None = None, db: Session = Depends(get_db), user: User = Depends(get_current_user)):
     q = db.query(BudgetHead)
     if project_id:
         q = q.filter(BudgetHead.project_id == project_id)
+    if user.role == UserRole.fellow:
+        q = q.join(Project, BudgetHead.project_id == Project.id).filter(Project.owner_user_id == user.id)
     return q.order_by(BudgetHead.id.asc()).all()
 
 
 @router.put("/budget-heads/{head_id}")
 def update_budget_head(head_id: int, payload: BudgetHeadUpdate, db: Session = Depends(get_db), user: User = Depends(get_current_user)):
+    ensure_admin(user)
     head = db.get(BudgetHead, head_id)
     if not head:
         raise HTTPException(status_code=404, detail="Budget head not found")
@@ -119,7 +137,8 @@ def update_budget_head(head_id: int, payload: BudgetHeadUpdate, db: Session = De
 
 
 @router.delete("/budget-heads/{head_id}")
-def delete_budget_head(head_id: int, db: Session = Depends(get_db), _: User = Depends(get_current_user)):
+def delete_budget_head(head_id: int, db: Session = Depends(get_db), user: User = Depends(get_current_user)):
+    ensure_admin(user)
     head = db.get(BudgetHead, head_id)
     if not head:
         raise HTTPException(status_code=404, detail="Budget head not found")
