@@ -10,7 +10,7 @@
     <header class="topbar">
       <div>
         <h1>E-YUVA Grant ERP Workspace</h1>
-        <p>Daily operations: transactions, reconciliation, event approvals, and reporting.</p>
+        <p>Daily operations: transactions, reconciliation, approvals, and reports.</p>
       </div>
       <div class="top-actions">
         <span id="profile" class="badge">Not logged in</span>
@@ -32,9 +32,9 @@
         <button class="nav-btn active" data-view="dashboard">Dashboard</button>
         <button id="navMaster" class="nav-btn" data-view="master">Master Data</button>
         <button id="navUsers" class="nav-btn" data-view="users">Users</button>
-        <button id="navEvents" class="nav-btn" data-view="events">Calendar & Events</button>
         <button id="navTransactions" class="nav-btn" data-view="transactions">Transactions</button>
-        <button id="navReports" class="nav-btn" data-view="reports">Reports & Templates</button>
+        <button id="navReconcile" class="nav-btn" data-view="reconciliation">Bank Reconciliation</button>
+        <button id="navEventsReports" class="nav-btn" data-view="eventsReports">Events & Reports</button>
       </aside>
 
       <main class="content">
@@ -48,11 +48,11 @@
             <li id="stepAccounts">Accounts & Bank: pending</li>
           </ul>
           <div class="row">
-            <button id="goUsersBtn" type="button">Go to Users</button>
-            <button id="goMasterBtn" type="button">Go to Master Data</button>
-            <button id="refreshSetupBtn" type="button">Refresh Setup Status</button>
+            <button id="goUsersBtn">Go to Users</button>
+            <button id="goMasterBtn">Go to Master Data</button>
+            <button id="refreshSetupBtn">Refresh Setup Status</button>
+            <button id="refreshSummaryBtn">Refresh Centre Summary</button>
           </div>
-          <button id="refreshSummaryBtn" type="button">Refresh Centre Summary</button>
           <table id="centreTable">
             <thead><tr><th>Budget Head</th><th>Sanctioned</th><th>Spent</th><th>Remaining</th><th>%</th></tr></thead>
             <tbody></tbody>
@@ -72,17 +72,12 @@
               <div class="row"><button id="createAccountBtn">Add Account</button><button id="loadAccountsBtn">Refresh</button></div>
               <table id="accountsTable"><thead><tr><th>ID</th><th>Code</th><th>Name</th><th>Type</th><th>Actions</th></tr></thead><tbody></tbody></table>
             </div>
-
             <div class="subcard">
               <h3>Projects</h3>
-              <div class="grid2">
-                <input id="projectCode" placeholder="Code" />
-                <input id="projectName" placeholder="Name" />
-              </div>
+              <div class="grid2"><input id="projectCode" placeholder="Code" /><input id="projectName" placeholder="Name" /></div>
               <div class="row"><button id="createProjectBtn">Add Project</button><button id="loadProjectsBtn">Refresh</button></div>
               <table id="projectsTable"><thead><tr><th>ID</th><th>Code</th><th>Name</th><th>Actions</th></tr></thead><tbody></tbody></table>
             </div>
-
             <div class="subcard">
               <h3>Budget Heads</h3>
               <div class="grid2">
@@ -111,33 +106,20 @@
           <table id="usersTable"><thead><tr><th>ID</th><th>Name</th><th>Email</th><th>Role</th><th>Active</th><th>Actions</th></tr></thead><tbody></tbody></table>
         </section>
 
-        <section id="events" class="view card">
-          <h2>Calendar & Events</h2>
-          <div class="grid2">
-            <input id="eventTitle" placeholder="Event title" />
-            <input id="eventDesc" placeholder="Description" />
-            <input id="eventProjectId" type="number" placeholder="Project ID" />
-            <input id="eventHeadId" type="number" placeholder="Budget Head ID" />
-          </div>
-          <div class="row"><button id="createEventBtn">Create Event</button><button id="loadEventsBtn">List Events</button></div>
-          <div class="row">
-            <input id="priorTemplateId" type="number" placeholder="Prior approval template ID" />
-            <input id="priorEventId" type="number" placeholder="Event ID" />
-            <button id="generatePriorBtn">Generate Prior Approval</button>
-          </div>
-          <pre id="eventResult"></pre>
-        </section>
-
         <section id="transactions" class="view card">
           <h2>Transactions</h2>
           <div class="row">
-            <input id="txnNarration" placeholder="Narration" value="Sample transaction" />
+            <select id="txnFilterProject"><option value="">All Projects</option></select>
+            <select id="txnFilterHead"><option value="">All Heads</option></select>
             <input id="txnFromDate" type="date" />
             <input id="txnToDate" type="date" />
-            <button id="listTxnBtn">Filter Transactions</button>
+            <button id="listTxnBtn">Apply Filters</button>
             <button id="deleteLastTxnBtn">Undo Last Transaction</button>
           </div>
-          <h3>Line Items</h3>
+          <table id="txnTable"><thead><tr><th>ID</th><th>Date</th><th>Narration</th><th>Reference</th></tr></thead><tbody></tbody></table>
+
+          <h3>New Transaction</h3>
+          <input id="txnNarration" placeholder="Narration" value="Sample transaction" />
           <table id="txnLinesTable">
             <thead><tr><th>Account ID</th><th>Project ID</th><th>Budget Head ID</th><th>Entry</th><th>Amount</th><th></th></tr></thead>
             <tbody></tbody>
@@ -149,8 +131,10 @@
           </div>
           <pre id="txnWarningResult"></pre>
           <pre id="txnResult"></pre>
+        </section>
 
-          <h3>Bank Reconciliation</h3>
+        <section id="reconciliation" class="view card">
+          <h2>Bank Reconciliation</h2>
           <div class="row">
             <input id="bankName" placeholder="Bank name" />
             <input id="bankNumber" placeholder="Masked account number" />
@@ -164,27 +148,51 @@
             <button id="importStatementBtn">Import Statement JSON</button>
           </div>
           <table id="statementTable"><thead><tr><th>Line ID</th><th>Date</th><th>Description</th><th>Debit</th><th>Credit</th><th>Reconciled</th><th>Match Txn ID</th><th>Action</th></tr></thead><tbody></tbody></table>
+          <pre id="reconcileResult"></pre>
         </section>
 
-        <section id="reports" class="view card">
-          <h2>Reports & Templates</h2>
-          <input id="templateName" value="UC Basic Template" />
-          <select id="templateType"><option>UC</option><option>SoE</option><option>PriorApproval</option><option>EventReport</option><option>Newsletter</option></select>
-          <textarea id="templateJson" rows="4">{"sections":[{"title":"Grant Summary"}]}</textarea>
-          <textarea id="templateHtml" rows="4"><h1>{{ project_name }}</h1><p>Total spent: {{ total_spent }}</p></textarea>
-          <div class="row"><button id="saveTemplateBtn">Save Template</button><button id="loadTemplatesBtn">List Templates</button></div>
-
-          <h3>Generate Report</h3>
-          <div class="row">
-            <input id="generateTemplateId" type="number" placeholder="Template ID" />
-            <input id="generateProjectId" type="number" placeholder="Project ID" />
-            <input id="generateFromDate" type="date" />
-            <input id="generateToDate" type="date" />
-            <button id="generateReportBtn">Generate</button>
-            <button id="downloadReportBtn">Download HTML</button>
+        <section id="eventsReports" class="view card">
+          <h2>Events & Reports</h2>
+          <div class="tab-row">
+            <button class="subtab active" data-subview="eventsPane">Events</button>
+            <button class="subtab" data-subview="reportsPane">Reports</button>
           </div>
-          <pre id="templateResult"></pre>
-          <iframe id="reportPreview" style="width:100%;height:260px;border:1px solid #ddd;border-radius:6px;"></iframe>
+
+          <div id="eventsPane" class="subview active">
+            <h3>Events</h3>
+            <div class="grid2">
+              <input id="eventTitle" placeholder="Event title" />
+              <input id="eventDesc" placeholder="Description" />
+              <input id="eventProjectId" type="number" placeholder="Project ID" />
+              <input id="eventHeadId" type="number" placeholder="Budget Head ID" />
+            </div>
+            <div class="row"><button id="createEventBtn">Create Event</button><button id="loadEventsBtn">List Events</button></div>
+            <div class="row">
+              <select id="priorTemplateIdSelect"><option value="">Prior approval template</option></select>
+            </div>
+            <table id="eventsTable"><thead><tr><th>ID</th><th>Title</th><th>Project</th><th>Budget Head</th><th>Start</th><th>Action</th></tr></thead><tbody></tbody></table>
+            <pre id="eventResult"></pre>
+          </div>
+
+          <div id="reportsPane" class="subview">
+            <h3>Templates & Generation</h3>
+            <input id="templateName" value="UC Basic Template" />
+            <select id="templateType"><option>UC</option><option>SoE</option><option>PriorApproval</option><option>EventReport</option><option>Newsletter</option></select>
+            <textarea id="templateJson" rows="4">{"sections":[{"title":"Grant Summary"}]}</textarea>
+            <textarea id="templateHtml" rows="4"><h1>{{ project_name }}</h1><p>Total spent: {{ total_spent }}</p></textarea>
+            <div class="row"><button id="saveTemplateBtn">Save Template</button><button id="loadTemplatesBtn">List Templates</button></div>
+
+            <div class="row">
+              <select id="generateTemplateSelect"><option value="">Template</option></select>
+              <select id="generateProjectSelect"><option value="">Project (optional)</option></select>
+              <input id="generateFromDate" type="date" />
+              <input id="generateToDate" type="date" />
+              <button id="generateReportBtn">Generate</button>
+              <button id="downloadReportBtn">Download HTML</button>
+            </div>
+            <pre id="templateResult"></pre>
+            <iframe id="reportPreview" style="width:100%;height:260px;border:1px solid #ddd;border-radius:6px;"></iframe>
+          </div>
         </section>
       </main>
     </div>

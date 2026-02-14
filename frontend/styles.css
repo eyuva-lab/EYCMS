@@ -26,3 +26,9 @@ pre { background:#f8fafc; border:1px solid #e5e7eb; border-radius: 8px; padding:
 
 .checklist { padding-left: 18px; margin: 6px 0 10px; }
 .checklist li { margin: 4px 0; }
+
+.tab-row { display:flex; gap:8px; margin:8px 0; }
+.subtab { background:#e8eef7; color:#1f4f7b; border:1px solid #c3d3ea; }
+.subtab.active { background:#2d5aa3; color:#fff; }
+.subview { display:none; }
+.subview.active { display:block; }

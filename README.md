@@ -90,6 +90,7 @@ Then open `http://127.0.0.1:<number>` and `http://127.0.0.1:<number>/docs`.
 
 ## UI notes
 
+- Day 7 sprint adds full operational pages: transactions filters+line-items+warnings, reconciliation table with matching, events prior-approval table actions, and reports generation dropdown workflow.
 - Day 5-6 sprint adds operational UI for transactions, bank reconciliation, events approvals, report generation, and role-aware edit safety.
 - Day 3-4 sprint adds Home setup checklist + role-aware navigation + default coordinator/centre seeding.
 - Day 1-2 sprint adds CRUD-style UI actions (create/list/edit/delete) for Users and Master Data (accounts/projects/budget heads).
