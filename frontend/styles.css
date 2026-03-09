@@ -32,3 +32,9 @@ pre { background:#f8fafc; border:1px solid #e5e7eb; border-radius: 8px; padding:
 .subtab.active { background:#2d5aa3; color:#fff; }
 .subview { display:none; }
 .subview.active { display:block; }
+
+.builder-canvas { border:1px dashed #9fb4d3; background:#f9fbff; border-radius:8px; min-height:120px; padding:10px; display:flex; flex-direction:column; gap:8px; }
+.builder-block { border:1px solid #d9e3f2; border-radius:6px; padding:8px; background:#fff; }
+.builder-block.selected { border-color:#2d5aa3; box-shadow:0 0 0 2px #d9e6ff inset; }
+.builder-block textarea { width:100%; margin-top:6px; }
+#statementRowsJson, #statementFieldMap { width:100%; }

@@ -1,9 +1,10 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile
 from sqlalchemy.orm import Session
 
 from app.deps import get_current_user, get_db
 from app.models import BankAccount, BankStatementLine, Project, Transaction, User, UserRole
 from app.schemas import BankStatementImportRow
+from app.services.bank_import import parse_statement_file
 
 router = APIRouter(prefix="/bank", tags=["bank"])
 
@@ -64,6 +65,29 @@ def import_statement(
         db.add(line)
     db.commit()
     return {"imported": len(rows)}
+
+
+
+
+@router.post("/import/preview")
+async def preview_statement_import(
+    file: UploadFile = File(...),
+    file_format: str = Form("auto"),
+    field_mapping: str = Form("{}"),
+    _: User = Depends(get_current_user),
+):
+    content = await file.read()
+    rows = parse_statement_file(content, file.filename or '', file_format=file_format, field_mapping_raw=field_mapping)
+    normalized = []
+    for row in rows:
+        normalized.append({
+            'statement_date': row['statement_date'].isoformat(),
+            'description': row['description'],
+            'debit': str(row['debit']),
+            'credit': str(row['credit']),
+            'closing_balance': str(row['closing_balance']) if row.get('closing_balance') is not None else None,
+        })
+    return {'rows': normalized, 'count': len(normalized)}
 
 
 @router.post("/reconcile/{statement_line_id}/{transaction_id}")

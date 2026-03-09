@@ -90,6 +90,7 @@ Then open `http://127.0.0.1:<number>` and `http://127.0.0.1:<number>/docs`.
 
 ## UI notes
 
+- Day 8 sprint adds guided frequent transaction types + manual journal mode, multi-format bank import preview (CSV/XLSX/MT940/CAMT.053), and MVP drag-drop report builder with tag insertion.
 - Day 7 sprint adds full operational pages: transactions filters+line-items+warnings, reconciliation table with matching, events prior-approval table actions, and reports generation dropdown workflow.
 - Day 5-6 sprint adds operational UI for transactions, bank reconciliation, events approvals, report generation, and role-aware edit safety.
 - Day 3-4 sprint adds Home setup checklist + role-aware navigation + default coordinator/centre seeding.

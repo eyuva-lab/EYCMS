@@ -119,13 +119,36 @@
           <table id="txnTable"><thead><tr><th>ID</th><th>Date</th><th>Narration</th><th>Reference</th></tr></thead><tbody></tbody></table>
 
           <h3>New Transaction</h3>
-          <input id="txnNarration" placeholder="Narration" value="Sample transaction" />
-          <table id="txnLinesTable">
-            <thead><tr><th>Account ID</th><th>Project ID</th><th>Budget Head ID</th><th>Entry</th><th>Amount</th><th></th></tr></thead>
-            <tbody></tbody>
-          </table>
           <div class="row">
-            <button id="addTxnLineBtn">Add Line</button>
+            <button class="subtab active" id="txnModeGuided" type="button">Guided (Frequent Type)</button>
+            <button class="subtab" id="txnModeManual" type="button">Manual Journal Entry</button>
+          </div>
+          <input id="txnNarration" placeholder="Narration" value="Sample transaction" />
+
+          <div id="txnGuidedPane" class="subview active">
+            <div class="grid2">
+              <select id="txnTypeSelect"><option value="">Select transaction type</option></select>
+              <input id="txnTypeAmount" type="number" step="0.01" placeholder="Amount" />
+              <input id="txnTypeProjectId" type="number" placeholder="Project ID (optional)" />
+              <input id="txnTypeHeadId" type="number" placeholder="Budget Head ID (optional)" />
+            </div>
+            <div class="row">
+              <button id="applyTxnTypeBtn">Apply Type To Journal</button>
+              <button id="saveTxnTypeBtn">Save Current Lines as New Type</button>
+            </div>
+          </div>
+
+          <div id="txnManualPane" class="subview">
+            <table id="txnLinesTable">
+              <thead><tr><th>Account ID</th><th>Project ID</th><th>Budget Head ID</th><th>Entry</th><th>Amount</th><th></th></tr></thead>
+              <tbody></tbody>
+            </table>
+            <div class="row">
+              <button id="addTxnLineBtn">Add Line</button>
+            </div>
+          </div>
+
+          <div class="row">
             <button id="checkBudgetBtn">Check Budget Warning</button>
             <button id="createTxnBtn">Post Transaction</button>
           </div>
@@ -147,6 +170,21 @@
             <textarea id="statementRowsJson" rows="3">[{"statement_date":"2026-01-01T00:00:00","description":"Sample debit","debit":100,"credit":0,"closing_balance":900}]</textarea>
             <button id="importStatementBtn">Import Statement JSON</button>
           </div>
+          <h3>File Import (CSV/XLSX/MT940/CAMT.053)</h3>
+          <div class="row">
+            <input id="statementFile" type="file" accept=".csv,.xlsx,.xls,.mt940,.sta,.xml" />
+            <select id="statementFormatSelect">
+              <option value="auto">Auto detect</option>
+              <option value="csv">CSV</option>
+              <option value="xlsx">XLSX</option>
+              <option value="mt940">MT940</option>
+              <option value="camt053">CAMT.053 XML</option>
+            </select>
+            <button id="previewImportBtn">Preview Parsed Rows</button>
+            <button id="importParsedBtn">Import Parsed Rows</button>
+          </div>
+          <textarea id="statementFieldMap" rows="2" placeholder='Optional field map JSON, e.g. {"date":"Txn Date","description":"Narration","debit":"Dr","credit":"Cr","closing_balance":"Balance"}'></textarea>
+          <pre id="importPreviewResult"></pre>
           <table id="statementTable"><thead><tr><th>Line ID</th><th>Date</th><th>Description</th><th>Debit</th><th>Credit</th><th>Reconciled</th><th>Match Txn ID</th><th>Action</th></tr></thead><tbody></tbody></table>
           <pre id="reconcileResult"></pre>
         </section>
@@ -181,6 +219,22 @@
             <textarea id="templateJson" rows="4">{"sections":[{"title":"Grant Summary"}]}</textarea>
             <textarea id="templateHtml" rows="4"><h1>{{ project_name }}</h1><p>Total spent: {{ total_spent }}</p></textarea>
             <div class="row"><button id="saveTemplateBtn">Save Template</button><button id="loadTemplatesBtn">List Templates</button></div>
+
+            <h4>Visual Builder (MVP)</h4>
+            <div class="row">
+              <button id="addHeadingBlockBtn">+ Heading</button>
+              <button id="addParagraphBlockBtn">+ Paragraph</button>
+              <button id="addDataTagBlockBtn">+ Data Tag</button>
+              <select id="builderTagSelect"><option value="{{ project_name }}">project_name</option><option value="{{ total_spent }}">total_spent</option><option value="{{ from_date }}">from_date</option><option value="{{ to_date }}">to_date</option><option value="{{ event_title }}">event_title</option><option value="{{ event_date }}">event_date</option></select>
+              <button id="insertTagBtn">Insert Tag in Selected Block</button>
+            </div>
+            <div id="builderCanvas" class="builder-canvas"></div>
+            <div class="row">
+              <button id="moveBlockUpBtn">Move Up</button>
+              <button id="moveBlockDownBtn">Move Down</button>
+              <button id="deleteBlockBtn">Delete Block</button>
+              <button id="buildTemplateBtn">Build Template from Canvas</button>
+            </div>
 
             <div class="row">
               <select id="generateTemplateSelect"><option value="">Template</option></select>
