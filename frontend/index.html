@@ -1,0 +1,260 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>E-YUVA ERP Workspace</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header class="topbar">
+      <div>
+        <h1>E-YUVA Grant ERP Workspace</h1>
+        <p>Daily operations: transactions, reconciliation, approvals, and reports.</p>
+      </div>
+      <div class="top-actions">
+        <span id="profile" class="badge">Not logged in</span>
+        <button id="logoutBtn" class="ghost" type="button">Logout</button>
+      </div>
+    </header>
+
+    <section id="loginCard" class="card login-card">
+      <h2>Login</h2>
+      <div class="grid2">
+        <input id="email" type="email" placeholder="Email" />
+        <input id="password" type="password" placeholder="Password" />
+      </div>
+      <button id="loginBtn" type="button">Login</button>
+    </section>
+
+    <div class="app-shell">
+      <aside class="sidebar">
+        <button class="nav-btn active" data-view="dashboard">Dashboard</button>
+        <button id="navMaster" class="nav-btn" data-view="master">Master Data</button>
+        <button id="navUsers" class="nav-btn" data-view="users">Users</button>
+        <button id="navTransactions" class="nav-btn" data-view="transactions">Transactions</button>
+        <button id="navReconcile" class="nav-btn" data-view="reconciliation">Bank Reconciliation</button>
+        <button id="navEventsReports" class="nav-btn" data-view="eventsReports">Events & Reports</button>
+      </aside>
+
+      <main class="content">
+        <section id="dashboard" class="view active card">
+          <h2>Home / Dashboard</h2>
+          <p><strong>Finish setup in 4 steps:</strong> Users → Projects/Fellows → Budget Heads → Accounts & Bank.</p>
+          <ul id="setupChecklist" class="checklist">
+            <li id="stepUsers">Users: pending</li>
+            <li id="stepProjects">Projects/Fellows: pending</li>
+            <li id="stepHeads">Budget Heads: pending</li>
+            <li id="stepAccounts">Accounts & Bank: pending</li>
+          </ul>
+          <div class="row">
+            <button id="goUsersBtn">Go to Users</button>
+            <button id="goMasterBtn">Go to Master Data</button>
+            <button id="refreshSetupBtn">Refresh Setup Status</button>
+            <button id="refreshSummaryBtn">Refresh Centre Summary</button>
+          </div>
+          <table id="centreTable">
+            <thead><tr><th>Budget Head</th><th>Sanctioned</th><th>Spent</th><th>Remaining</th><th>%</th></tr></thead>
+            <tbody></tbody>
+          </table>
+        </section>
+
+        <section id="master" class="view card">
+          <h2>Master Data</h2>
+          <div class="panel-grid">
+            <div class="subcard">
+              <h3>Accounts</h3>
+              <div class="grid2">
+                <input id="accountCode" placeholder="Code" />
+                <input id="accountName" placeholder="Name" />
+                <select id="accountType"><option>ASSET</option><option>LIABILITY</option><option>EQUITY</option><option>INCOME</option><option>EXPENSE</option></select>
+              </div>
+              <div class="row"><button id="createAccountBtn">Add Account</button><button id="loadAccountsBtn">Refresh</button></div>
+              <table id="accountsTable"><thead><tr><th>ID</th><th>Code</th><th>Name</th><th>Type</th><th>Actions</th></tr></thead><tbody></tbody></table>
+            </div>
+            <div class="subcard">
+              <h3>Projects</h3>
+              <div class="grid2"><input id="projectCode" placeholder="Code" /><input id="projectName" placeholder="Name" /></div>
+              <div class="row"><button id="createProjectBtn">Add Project</button><button id="loadProjectsBtn">Refresh</button></div>
+              <table id="projectsTable"><thead><tr><th>ID</th><th>Code</th><th>Name</th><th>Actions</th></tr></thead><tbody></tbody></table>
+            </div>
+            <div class="subcard">
+              <h3>Budget Heads</h3>
+              <div class="grid2">
+                <input id="headCode" placeholder="Code" />
+                <input id="headName" placeholder="Name" />
+                <input id="headProjectId" type="number" placeholder="Project ID (optional)" />
+                <input id="headAmount" type="number" step="0.01" placeholder="Sanctioned amount" />
+              </div>
+              <div class="row"><button id="createHeadBtn">Add Head</button><button id="loadHeadsBtn">Refresh</button></div>
+              <table id="headsTable"><thead><tr><th>ID</th><th>Code</th><th>Name</th><th>Project</th><th>Sanctioned</th><th>Actions</th></tr></thead><tbody></tbody></table>
+            </div>
+          </div>
+          <pre id="masterResult"></pre>
+        </section>
+
+        <section id="users" class="view card">
+          <h2>Users</h2>
+          <div class="grid2">
+            <input id="userName" placeholder="Name" />
+            <input id="userEmail" type="email" placeholder="Email" />
+            <input id="userPassword" type="password" placeholder="Password" />
+            <select id="userRole"><option>COORDINATOR</option><option>FINANCE</option><option>FELLOW</option><option>AUDITOR</option></select>
+          </div>
+          <div class="row"><button id="createUserBtn">Add User</button><button id="loadUsersBtn">Refresh Users</button></div>
+          <pre id="userActionResult"></pre>
+          <table id="usersTable"><thead><tr><th>ID</th><th>Name</th><th>Email</th><th>Role</th><th>Active</th><th>Actions</th></tr></thead><tbody></tbody></table>
+        </section>
+
+        <section id="transactions" class="view card">
+          <h2>Transactions</h2>
+          <div class="row">
+            <select id="txnFilterProject"><option value="">All Projects</option></select>
+            <select id="txnFilterHead"><option value="">All Heads</option></select>
+            <input id="txnFromDate" type="date" />
+            <input id="txnToDate" type="date" />
+            <button id="listTxnBtn">Apply Filters</button>
+            <button id="reverseLastTxnBtn">Reverse Latest Transaction</button>
+          </div>
+          <table id="txnTable"><thead><tr><th>ID</th><th>Date</th><th>Narration</th><th>Reference</th></tr></thead><tbody></tbody></table>
+
+          <h3>New Transaction</h3>
+          <div class="row">
+            <button class="subtab active" id="txnModeGuided" type="button">Guided (Frequent Type)</button>
+            <button class="subtab" id="txnModeManual" type="button">Manual Journal Entry</button>
+          </div>
+          <input id="txnDate" type="date" />
+          <input id="txnNarration" placeholder="Narration" value="Sample transaction" />
+
+          <div id="txnGuidedPane" class="subview active">
+            <div class="grid2">
+              <select id="txnTypeSelect"><option value="">Select transaction type</option></select>
+              <input id="txnTypeAmount" type="number" step="0.01" placeholder="Amount" />
+              <input id="txnTypeProjectId" type="number" placeholder="Project ID (optional)" />
+              <input id="txnTypeHeadId" type="number" placeholder="Budget Head ID (optional)" />
+            </div>
+            <div class="row">
+              <button id="applyTxnTypeBtn">Apply Type To Journal</button>
+              <button id="saveTxnTypeBtn">Save Current Lines as New Type</button>
+            </div>
+          </div>
+
+          <div id="txnManualPane" class="subview">
+            <table id="txnLinesTable">
+              <thead><tr><th>Account ID</th><th>Project ID</th><th>Budget Head ID</th><th>Entry</th><th>Amount</th><th></th></tr></thead>
+              <tbody></tbody>
+            </table>
+            <datalist id="accountOptions"></datalist>
+            <datalist id="projectOptions"></datalist>
+            <datalist id="headOptions"></datalist>
+            <div class="row">
+              <button id="addTxnLineBtn">Add Line</button>
+            </div>
+          </div>
+
+          <div class="row">
+            <button id="checkBudgetBtn">Check Budget Warning</button>
+            <button id="createTxnBtn">Post Transaction</button>
+          </div>
+          <pre id="txnWarningResult"></pre>
+          <pre id="txnResult"></pre>
+        </section>
+
+        <section id="reconciliation" class="view card">
+          <h2>Bank Reconciliation</h2>
+          <div class="row">
+            <input id="bankName" placeholder="Bank name" />
+            <input id="bankNumber" placeholder="Masked account number" />
+            <button id="createBankBtn">Add Bank</button>
+            <button id="listBankBtn">Refresh Banks</button>
+            <select id="bankAccountSelect"></select>
+            <button id="loadStatementsBtn">Load Statements</button>
+          </div>
+          <div class="row">
+            <textarea id="statementRowsJson" rows="3">[{"statement_date":"2026-01-01T00:00:00","description":"Sample debit","debit":100,"credit":0,"closing_balance":900}]</textarea>
+            <button id="importStatementBtn">Import Statement JSON</button>
+          </div>
+          <h3>File Import (CSV/XLSX/MT940/CAMT.053)</h3>
+          <div class="row">
+            <input id="statementFile" type="file" accept=".csv,.xlsx,.xls,.mt940,.sta,.xml" />
+            <select id="statementFormatSelect">
+              <option value="auto">Auto detect</option>
+              <option value="csv">CSV</option>
+              <option value="xlsx">XLSX</option>
+              <option value="mt940">MT940</option>
+              <option value="camt053">CAMT.053 XML</option>
+            </select>
+            <button id="previewImportBtn">Preview Parsed Rows</button>
+            <button id="importParsedBtn">Import Parsed Rows</button>
+          </div>
+          <textarea id="statementFieldMap" rows="2" placeholder='Optional field map JSON, e.g. {"date":"Txn Date","description":"Narration","debit":"Dr","credit":"Cr","closing_balance":"Balance"}'></textarea>
+          <pre id="importPreviewResult"></pre>
+          <table id="statementTable"><thead><tr><th>Line ID</th><th>Date</th><th>Description</th><th>Debit</th><th>Credit</th><th>Reconciled</th><th>Match Txn ID</th><th>Action</th></tr></thead><tbody></tbody></table>
+          <pre id="reconcileResult"></pre>
+        </section>
+
+        <section id="eventsReports" class="view card">
+          <h2>Events & Reports</h2>
+          <div class="tab-row">
+            <button class="subtab active" data-subview="eventsPane">Events</button>
+            <button class="subtab" data-subview="reportsPane">Reports</button>
+          </div>
+
+          <div id="eventsPane" class="subview active">
+            <h3>Events</h3>
+            <div class="grid2">
+              <input id="eventTitle" placeholder="Event title" />
+              <input id="eventDesc" placeholder="Description" />
+              <input id="eventProjectId" type="number" placeholder="Project ID" />
+              <input id="eventHeadId" type="number" placeholder="Budget Head ID" />
+            </div>
+            <div class="row"><button id="createEventBtn">Create Event</button><button id="loadEventsBtn">List Events</button></div>
+            <div class="row">
+              <select id="priorTemplateIdSelect"><option value="">Prior approval template</option></select>
+            </div>
+            <table id="eventsTable"><thead><tr><th>ID</th><th>Title</th><th>Project</th><th>Budget Head</th><th>Start</th><th>Action</th></tr></thead><tbody></tbody></table>
+            <pre id="eventResult"></pre>
+          </div>
+
+          <div id="reportsPane" class="subview">
+            <h3>Templates & Generation</h3>
+            <input id="templateName" value="UC Basic Template" />
+            <select id="templateType"><option>UC</option><option>SoE</option><option>PriorApproval</option><option>EventReport</option><option>Newsletter</option></select>
+            <textarea id="templateJson" rows="4">{"sections":[{"title":"Grant Summary"}]}</textarea>
+            <textarea id="templateHtml" rows="4"><h1>{{ project_name }}</h1><p>Total spent: {{ total_spent }}</p></textarea>
+            <div class="row"><button id="saveTemplateBtn">Save Template</button><button id="loadTemplatesBtn">List Templates</button></div>
+
+            <h4>Visual Builder (MVP)</h4>
+            <div class="row">
+              <button id="addHeadingBlockBtn">+ Heading</button>
+              <button id="addParagraphBlockBtn">+ Paragraph</button>
+              <button id="addDataTagBlockBtn">+ Data Tag</button>
+              <select id="builderTagSelect"><option value="{{ project_name }}">project_name</option><option value="{{ total_spent }}">total_spent</option><option value="{{ from_date }}">from_date</option><option value="{{ to_date }}">to_date</option><option value="{{ event_title }}">event_title</option><option value="{{ event_date }}">event_date</option></select>
+              <button id="insertTagBtn">Insert Tag in Selected Block</button>
+            </div>
+            <div id="builderCanvas" class="builder-canvas"></div>
+            <div class="row">
+              <button id="moveBlockUpBtn">Move Up</button>
+              <button id="moveBlockDownBtn">Move Down</button>
+              <button id="deleteBlockBtn">Delete Block</button>
+              <button id="buildTemplateBtn">Build Template from Canvas</button>
+            </div>
+
+            <div class="row">
+              <select id="generateTemplateSelect"><option value="">Template</option></select>
+              <select id="generateProjectSelect"><option value="">Project (optional)</option></select>
+              <input id="generateFromDate" type="date" />
+              <input id="generateToDate" type="date" />
+              <button id="generateReportBtn">Generate</button>
+              <button id="downloadReportBtn">Download HTML</button>
+            </div>
+            <pre id="templateResult"></pre>
+            <iframe id="reportPreview" style="width:100%;height:260px;border:1px solid #ddd;border-radius:6px;"></iframe>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <script src="app.js"></script>
+  </body>
+</html>
