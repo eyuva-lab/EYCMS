@@ -1,3 +1,4 @@
+from pathlib import Path
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
@@ -47,8 +48,11 @@ def run_report(payload: GenerateReportRequest, db: Session = Depends(get_db), us
     except ValueError as exc:
         raise HTTPException(status_code=404, detail=str(exc))
 
+    html_output = report.html_output
+    if report.pdf_path and Path(report.pdf_path).exists():
+        html_output = Path(report.pdf_path).read_text(encoding="utf-8")
     return {
         "report_id": report.id,
-        "html_output": report.html_output,
+        "html_output": html_output,
         "pdf_path": report.pdf_path,
     }

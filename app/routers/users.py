@@ -14,8 +14,8 @@ def ensure_manage_permission(current: User):
 
 
 @router.get("", response_model=list[UserOut])
-def list_users(db: Session = Depends(get_db), _: User = Depends(get_current_user)):
-    return db.query(User).order_by(User.id.asc()).all()
+def list_users(limit: int = 100, offset: int = 0, db: Session = Depends(get_db), _: User = Depends(get_current_user)):
+    return db.query(User).order_by(User.id.asc()).offset(offset).limit(min(limit, 500)).all()
 
 
 @router.post("", response_model=UserOut)

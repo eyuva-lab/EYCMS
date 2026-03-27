@@ -31,8 +31,8 @@ def create_account(payload: AccountCreate, db: Session = Depends(get_db), user: 
 
 
 @router.get("/accounts")
-def list_accounts(db: Session = Depends(get_db), _: User = Depends(get_current_user)):
-    return db.query(Account).order_by(Account.id.asc()).all()
+def list_accounts(limit: int = 100, offset: int = 0, db: Session = Depends(get_db), _: User = Depends(get_current_user)):
+    return db.query(Account).order_by(Account.id.asc()).offset(offset).limit(min(limit, 500)).all()
 
 
 @router.put("/accounts/{account_id}")
@@ -70,11 +70,11 @@ def create_project(payload: ProjectCreate, db: Session = Depends(get_db), user: 
 
 
 @router.get("/projects")
-def list_projects(db: Session = Depends(get_db), user: User = Depends(get_current_user)):
+def list_projects(limit: int = 100, offset: int = 0, db: Session = Depends(get_db), user: User = Depends(get_current_user)):
     q = db.query(Project)
     if user.role == UserRole.fellow:
         q = q.filter(Project.owner_user_id == user.id)
-    return q.order_by(Project.id.asc()).all()
+    return q.order_by(Project.id.asc()).offset(offset).limit(min(limit, 500)).all()
 
 
 @router.put("/projects/{project_id}")
@@ -119,7 +119,7 @@ def list_budget_heads(project_id: int | None = None, db: Session = Depends(get_d
         q = q.filter(BudgetHead.project_id == project_id)
     if user.role == UserRole.fellow:
         q = q.join(Project, BudgetHead.project_id == Project.id).filter(Project.owner_user_id == user.id)
-    return q.order_by(BudgetHead.id.asc()).all()
+    return q.order_by(BudgetHead.id.asc()).offset(offset).limit(min(limit, 500)).all()
 
 
 @router.put("/budget-heads/{head_id}")

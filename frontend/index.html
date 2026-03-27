@@ -114,7 +114,7 @@
             <input id="txnFromDate" type="date" />
             <input id="txnToDate" type="date" />
             <button id="listTxnBtn">Apply Filters</button>
-            <button id="deleteLastTxnBtn">Undo Last Transaction</button>
+            <button id="reverseLastTxnBtn">Reverse Latest Transaction</button>
           </div>
           <table id="txnTable"><thead><tr><th>ID</th><th>Date</th><th>Narration</th><th>Reference</th></tr></thead><tbody></tbody></table>
 
@@ -123,6 +123,7 @@
             <button class="subtab active" id="txnModeGuided" type="button">Guided (Frequent Type)</button>
             <button class="subtab" id="txnModeManual" type="button">Manual Journal Entry</button>
           </div>
+          <input id="txnDate" type="date" />
           <input id="txnNarration" placeholder="Narration" value="Sample transaction" />
 
           <div id="txnGuidedPane" class="subview active">
@@ -143,6 +144,9 @@
               <thead><tr><th>Account ID</th><th>Project ID</th><th>Budget Head ID</th><th>Entry</th><th>Amount</th><th></th></tr></thead>
               <tbody></tbody>
             </table>
+            <datalist id="accountOptions"></datalist>
+            <datalist id="projectOptions"></datalist>
+            <datalist id="headOptions"></datalist>
             <div class="row">
               <button id="addTxnLineBtn">Add Line</button>
             </div>

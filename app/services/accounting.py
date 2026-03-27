@@ -14,7 +14,7 @@ def validate_double_entry(lines) -> None:
         raise HTTPException(status_code=400, detail="Transaction is not balanced")
 
 
-def centre_budget_summary(db: Session, from_date=None, to_date=None):
+def centre_budget_summary(db: Session, from_date=None, to_date=None, project_id: int | None = None):
     spent_expr = func.coalesce(
         func.sum(
             case((TransactionLine.entry_type == EntryType.debit, TransactionLine.amount), else_=0)
@@ -27,6 +27,8 @@ def centre_budget_summary(db: Session, from_date=None, to_date=None):
         .outerjoin(Transaction, Transaction.id == TransactionLine.transaction_id)
         .group_by(BudgetHead.id)
     )
+    if project_id:
+        stmt = stmt.where(TransactionLine.project_id == project_id)
     if from_date:
         stmt = stmt.where(Transaction.txn_date >= from_date)
     if to_date:

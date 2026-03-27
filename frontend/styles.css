@@ -38,3 +38,8 @@ pre { background:#f8fafc; border:1px solid #e5e7eb; border-radius: 8px; padding:
 .builder-block.selected { border-color:#2d5aa3; box-shadow:0 0 0 2px #d9e6ff inset; }
 .builder-block textarea { width:100%; margin-top:6px; }
 #statementRowsJson, #statementFieldMap { width:100%; }
+
+
+tbody tr:hover { background:#f8fbff; }
+.status-ok { color:#0f7a2f; font-weight:600; }
+.status-bad { color:#b42318; font-weight:600; }

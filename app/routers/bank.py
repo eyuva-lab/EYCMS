@@ -3,18 +3,18 @@ from sqlalchemy.orm import Session
 
 from app.deps import get_current_user, get_db
 from app.models import BankAccount, BankStatementLine, Project, Transaction, User, UserRole
-from app.schemas import BankStatementImportRow
+from app.schemas import BankAccountCreate, BankStatementImportRow
 from app.services.bank_import import parse_statement_file
 
 router = APIRouter(prefix="/bank", tags=["bank"])
 
 
 @router.get("/accounts")
-def list_bank_accounts(db: Session = Depends(get_db), user: User = Depends(get_current_user)):
+def list_bank_accounts(limit: int = 100, offset: int = 0, db: Session = Depends(get_db), user: User = Depends(get_current_user)):
     q = db.query(BankAccount)
     if user.role == UserRole.fellow:
         q = q.join(Project, BankAccount.project_id == Project.id).filter(Project.owner_user_id == user.id)
-    return q.order_by(BankAccount.id.asc()).all()
+    return q.order_by(BankAccount.id.asc()).offset(offset).limit(min(limit, 500)).all()
 
 
 @router.get("/statements/{bank_account_id}")
@@ -36,10 +36,10 @@ def list_statement_lines(bank_account_id: int, db: Session = Depends(get_db), us
 
 
 @router.post("/accounts")
-def create_bank_account(payload: dict, db: Session = Depends(get_db), user: User = Depends(get_current_user)):
+def create_bank_account(payload: BankAccountCreate, db: Session = Depends(get_db), user: User = Depends(get_current_user)):
     if user.role in {UserRole.auditor, UserRole.fellow}:
         raise HTTPException(status_code=403, detail="Only coordinator/finance can create bank accounts")
-    account = BankAccount(**payload, created_by_id=user.id, updated_by_id=user.id)
+    account = BankAccount(**payload.model_dump(), created_by_id=user.id, updated_by_id=user.id)
     db.add(account)
     db.commit()
     db.refresh(account)

@@ -1,3 +1,5 @@
+import os
+import secrets
 from pathlib import Path
 
 from fastapi import FastAPI
@@ -13,21 +15,28 @@ Base.metadata.create_all(bind=engine)
 
 
 def seed_defaults() -> None:
+    if os.getenv("SEED_DEFAULTS", "false").lower() != "true":
+        return
+
     db = SessionLocal()
     try:
-        default_email = "coordinator@eyuva.local"
+        default_email = os.getenv("SEED_COORDINATOR_EMAIL", "coordinator@eyuva.local")
         coordinator = db.query(User).filter(User.email == default_email).first()
         if not coordinator:
+            seeded_password = os.getenv("SEED_COORDINATOR_PASSWORD") or secrets.token_urlsafe(12)
             coordinator = User(
                 name="Default Coordinator",
                 email=default_email,
-                password_hash=hash_password("admin123"[:72]),
+                password_hash=hash_password(seeded_password[:72]),
                 role=UserRole.coordinator,
                 is_active=True,
             )
             db.add(coordinator)
             db.commit()
             db.refresh(coordinator)
+            print(f"[seed] Coordinator created: {default_email}")
+            if not os.getenv("SEED_COORDINATOR_PASSWORD"):
+                print(f"[seed] Generated coordinator password (save now): {seeded_password}")
 
         centre = db.query(Project).filter(Project.is_centre_project.is_(True)).first()
         if not centre:
@@ -50,9 +59,10 @@ seed_defaults()
 
 app = FastAPI(title="E-YUVA Grant Manager")
 
+cors_origins = [o.strip() for o in os.getenv("CORS_ALLOWED_ORIGINS", "http://127.0.0.1:8000,http://localhost:8000").split(",") if o.strip()]
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=cors_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

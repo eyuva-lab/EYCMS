@@ -1,23 +1,27 @@
 const api = '';
-let token = localStorage.getItem('token') || '';
+let token = '';
 let generatedHtml = '';
 let parsedStatementRows = [];
 let selectedBuilderIndex = -1;
 
 const txnTypeStorageKey = 'txnTypes.v1';
-const defaultTxnTypes = [
-  { id: 'office-expense', name: 'Office Expense', debit_account_id: 5, credit_account_id: 2 },
-  { id: 'travel-advance', name: 'Travel Advance', debit_account_id: 6, credit_account_id: 2 },
-  { id: 'vendor-payment', name: 'Vendor Payment', debit_account_id: 7, credit_account_id: 2 },
-];
+const defaultTxnTypes = [];
 
 const builderBlocks = [];
 
 const authHeaders = () => (token ? { Authorization: `Bearer ${token}` } : {});
-const show = (id, payload) => (document.getElementById(id).innerText = typeof payload === 'string' ? payload : JSON.stringify(payload, null, 2));
+function toMessage(payload) {
+  if (typeof payload === "string") return payload;
+  if (payload && typeof payload === "object") {
+    if (payload.detail) return typeof payload.detail === "string" ? payload.detail : JSON.stringify(payload.detail);
+    if (payload.message) return payload.message;
+  }
+  return JSON.stringify(payload, null, 2);
+}
+const show = (id, payload) => (document.getElementById(id).innerText = toMessage(payload));
 
 async function call(path, options = {}) {
-  const res = await fetch(`${api}${path}`, { ...options, headers: { ...(options.headers || {}), ...authHeaders() } });
+  const res = await fetch(`${api}${path}`, { ...options, credentials: "include", headers: { ...(options.headers || {}), ...authHeaders() } });
   let data;
   try { data = await res.json(); } catch { data = await res.text(); }
   return { res, data };
@@ -93,13 +97,12 @@ async function login() {
   const { res, data } = await call('/auth/login', { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body });
   if (!res.ok) return show('userActionResult', data);
   token = data.access_token;
-  localStorage.setItem('token', token);
   await loadProfile();
   await bootstrapData();
 }
 function logout() {
   token = '';
-  localStorage.removeItem('token');
+  call('/auth/logout', { method: 'POST' });
   clearProtectedPanels();
   activateView('dashboard');
   setLoggedOut();
@@ -110,7 +113,7 @@ async function loadProfile() {
   if (!res.ok) return logout();
   setLoggedIn(data.name, data.role);
   applyRoleUI(data.role);
-  await Promise.all([loadProjectOptions(), loadHeadOptions(), loadTemplateOptions(), loadTxnTypeOptions()]);
+  await Promise.all([loadProjectOptions(), loadHeadOptions(), loadAccountOptions(), loadTemplateOptions(), loadTxnTypeOptions()]);
 }
 
 async function bootstrapData() {
@@ -135,16 +138,26 @@ async function loadProjectOptions() {
   if (!res.ok) return;
   txnFilterProject.innerHTML = '<option value="">All Projects</option>';
   generateProjectSelect.innerHTML = '<option value="">Project (optional)</option>';
+  projectOptions.innerHTML = '';
   data.forEach((p) => {
     const op1 = document.createElement('option'); op1.value = p.id; op1.textContent = `${p.id} - ${p.name}`; txnFilterProject.appendChild(op1);
     const op2 = document.createElement('option'); op2.value = p.id; op2.textContent = `${p.id} - ${p.name}`; generateProjectSelect.appendChild(op2);
+    const d = document.createElement('option'); d.value = p.id; d.label = `${p.code} - ${p.name}`; projectOptions.appendChild(d);
   });
 }
+async function loadAccountOptions() {
+  const { res, data } = await call('/master/accounts');
+  if (!res.ok) return;
+  accountOptions.innerHTML = "";
+  data.forEach((a) => { const op = document.createElement('option'); op.value = a.id; op.label = `${a.code} - ${a.name}`; accountOptions.appendChild(op); });
+}
+
 async function loadHeadOptions() {
   const { res, data } = await call('/master/budget-heads');
   if (!res.ok) return;
   txnFilterHead.innerHTML = '<option value="">All Heads</option>';
-  data.forEach((h) => { const op = document.createElement('option'); op.value = h.id; op.textContent = `${h.id} - ${h.name}`; txnFilterHead.appendChild(op); });
+  headOptions.innerHTML = '';
+  data.forEach((h) => { const op = document.createElement('option'); op.value = h.id; op.textContent = `${h.id} - ${h.name}`; txnFilterHead.appendChild(op); const d = document.createElement('option'); d.value = h.id; d.label = `${h.code} - ${h.name}`; headOptions.appendChild(d); });
 }
 async function loadTemplateOptions() {
   const { res, data } = await call('/reports/templates');
@@ -210,9 +223,9 @@ function switchTxnMode(mode) {
 function addTxnLineRow(defaults = {}) {
   const tbody = document.querySelector('#txnLinesTable tbody');
   const tr = document.createElement('tr');
-  tr.innerHTML = `<td><input class="txn-account" type="number" value="${defaults.account_id || ''}"/></td>
-  <td><input class="txn-project" type="number" value="${defaults.project_id || ''}"/></td>
-  <td><input class="txn-head" type="number" value="${defaults.budget_head_id || ''}"/></td>
+  tr.innerHTML = `<td><input class="txn-account" list="accountOptions" type="number" value="${defaults.account_id || ''}"/></td>
+  <td><input class="txn-project" list="projectOptions" type="number" value="${defaults.project_id || ''}"/></td>
+  <td><input class="txn-head" list="headOptions" type="number" value="${defaults.budget_head_id || ''}"/></td>
   <td><select class="txn-entry"><option ${defaults.entry_type === 'DEBIT' ? 'selected' : ''}>DEBIT</option><option ${defaults.entry_type === 'CREDIT' ? 'selected' : ''}>CREDIT</option></select></td>
   <td><input class="txn-amount" type="number" step="0.01" value="${defaults.amount || ''}"/></td>
   <td><button class="remove-line">Remove</button></td>`;
@@ -256,8 +269,8 @@ function saveCurrentLinesAsType() {
   txnTypeSelect.value = id;
   show('txnResult', `Saved frequent type: ${name}`);
 }
-async function checkBudgetWarning() { const { data } = await call('/transactions/budget-check', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(collectTxnLines()) }); show('txnWarningResult', data); }
-async function createTxn() { const payload = { txn_date: new Date().toISOString(), narration: txnNarration.value, lines: collectTxnLines() }; const { data } = await call('/transactions', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) }); show('txnResult', data); await listTxn(); }
+async function checkBudgetWarning() { const payload = { from_date: txnFromDate.value ? `${txnFromDate.value}T00:00:00` : null, to_date: txnToDate.value ? `${txnToDate.value}T23:59:59` : null, lines: collectTxnLines() }; const { data } = await call('/transactions/budget-check', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) }); show('txnWarningResult', data); }
+async function createTxn() { const selectedDate = txnDate.value || new Date().toISOString().slice(0, 10); const payload = { txn_date: `${selectedDate}T00:00:00Z`, narration: txnNarration.value, lines: collectTxnLines() }; const { data } = await call('/transactions', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) }); show('txnResult', data); await listTxn(); }
 async function listTxn() {
   const qs = new URLSearchParams();
   if (txnFilterProject.value) qs.set('project_id', txnFilterProject.value);
@@ -275,7 +288,7 @@ async function listTxn() {
   });
   show('txnResult', data);
 }
-async function deleteLastTxn() { const { data } = await call('/transactions/last', { method: 'DELETE' }); show('txnResult', data); await listTxn(); }
+async function reverseLatestTxn() { const { res, data } = await call('/transactions?limit=1'); if (!res.ok || !Array.isArray(data) || !data.length) return show('txnResult', 'No transactions found.'); const latestId = data[0].id; const out = await call(`/transactions/${latestId}/reverse`, { method: 'POST' }); show('txnResult', out.data); await listTxn(); }
 
 // Bank reconciliation
 async function createBank() { const payload = { bank_name: bankName.value, account_number_masked: bankNumber.value }; const { data } = await call('/bank/accounts', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) }); show('reconcileResult', data); await listBank(); }
@@ -465,7 +478,7 @@ applyTxnTypeBtn.onclick = applySelectedTxnType;
 saveTxnTypeBtn.onclick = saveCurrentLinesAsType;
 addTxnLineBtn.onclick = () => addTxnLineRow();
 checkBudgetBtn.onclick = checkBudgetWarning;
-createTxnBtn.onclick = createTxn; listTxnBtn.onclick = listTxn; deleteLastTxnBtn.onclick = deleteLastTxn;
+createTxnBtn.onclick = createTxn; listTxnBtn.onclick = listTxn; reverseLastTxnBtn.onclick = reverseLatestTxn;
 
 createBankBtn.onclick = createBank; listBankBtn.onclick = listBank; loadStatementsBtn.onclick = loadStatements; importStatementBtn.onclick = importStatement;
 previewImportBtn.onclick = previewImportFile; importParsedBtn.onclick = importParsedRows;
@@ -489,4 +502,5 @@ switchTxnMode('guided');
 addTxnLineRow({ account_id: 1, project_id: 1, budget_head_id: 1, entry_type: 'DEBIT', amount: 1000 });
 addTxnLineRow({ account_id: 2, project_id: 1, budget_head_id: 1, entry_type: 'CREDIT', amount: 1000 });
 loadTxnTypeOptions();
+txnDate.value = new Date().toISOString().slice(0, 10);
 loadProfile().then(bootstrapData);

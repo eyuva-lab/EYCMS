@@ -1,4 +1,5 @@
-from datetime import datetime
+from datetime import date, datetime, timezone
+from decimal import Decimal
 from enum import Enum
 
 from sqlalchemy import (
@@ -7,7 +8,6 @@ from sqlalchemy import (
     Date,
     DateTime,
     Enum as SqlEnum,
-    Float,
     ForeignKey,
     Integer,
     Numeric,
@@ -20,9 +20,9 @@ from .database import Base
 
 
 class TimestampMixin:
-    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
     updated_at: Mapped[datetime] = mapped_column(
-        DateTime, default=datetime.utcnow, onupdate=datetime.utcnow
+        DateTime(timezone=True), default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc)
     )
     created_by_id: Mapped[int | None] = mapped_column(ForeignKey("users.id"), nullable=True)
     updated_by_id: Mapped[int | None] = mapped_column(ForeignKey("users.id"), nullable=True)
@@ -95,14 +95,14 @@ class BudgetHead(Base, TimestampMixin):
     code: Mapped[str] = mapped_column(String(50), index=True)
     name: Mapped[str] = mapped_column(String(255))
     project_id: Mapped[int | None] = mapped_column(ForeignKey("projects.id"), nullable=True)
-    sanctioned_amount: Mapped[float] = mapped_column(Numeric(14, 2), default=0)
+    sanctioned_amount: Mapped[Decimal] = mapped_column(Numeric(14, 2), default=Decimal("0"))
 
 
 class Transaction(Base, TimestampMixin):
     __tablename__ = "transactions"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
-    txn_date: Mapped[datetime] = mapped_column(DateTime, index=True)
+    txn_date: Mapped[datetime] = mapped_column(DateTime(timezone=True), index=True)
     narration: Mapped[str] = mapped_column(Text)
     reference_no: Mapped[str | None] = mapped_column(String(100), nullable=True)
 
@@ -111,7 +111,7 @@ class Transaction(Base, TimestampMixin):
     )
 
 
-class TransactionLine(Base):
+class TransactionLine(Base, TimestampMixin):
     __tablename__ = "transaction_lines"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
@@ -122,7 +122,7 @@ class TransactionLine(Base):
         ForeignKey("budget_heads.id"), nullable=True
     )
     entry_type: Mapped[EntryType] = mapped_column(SqlEnum(EntryType))
-    amount: Mapped[float] = mapped_column(Numeric(14, 2))
+    amount: Mapped[Decimal] = mapped_column(Numeric(14, 2))
 
     transaction: Mapped[Transaction] = relationship("Transaction", back_populates="lines")
 
@@ -150,11 +150,11 @@ class BankStatementLine(Base, TimestampMixin):
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     bank_account_id: Mapped[int] = mapped_column(ForeignKey("bank_accounts.id"), index=True)
-    statement_date: Mapped[datetime] = mapped_column(DateTime, index=True)
+    statement_date: Mapped[datetime] = mapped_column(DateTime(timezone=True), index=True)
     description: Mapped[str] = mapped_column(Text)
-    debit: Mapped[float] = mapped_column(Numeric(14, 2), default=0)
-    credit: Mapped[float] = mapped_column(Numeric(14, 2), default=0)
-    closing_balance: Mapped[float | None] = mapped_column(Numeric(14, 2), nullable=True)
+    debit: Mapped[Decimal] = mapped_column(Numeric(14, 2), default=Decimal("0"))
+    credit: Mapped[Decimal] = mapped_column(Numeric(14, 2), default=Decimal("0"))
+    closing_balance: Mapped[Decimal | None] = mapped_column(Numeric(14, 2), nullable=True)
     is_reconciled: Mapped[bool] = mapped_column(Boolean, default=False)
     matched_transaction_id: Mapped[int | None] = mapped_column(
         ForeignKey("transactions.id"), nullable=True
@@ -167,11 +167,11 @@ class Event(Base, TimestampMixin):
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     title: Mapped[str] = mapped_column(String(255))
     description: Mapped[str | None] = mapped_column(Text, nullable=True)
-    start_at: Mapped[datetime] = mapped_column(DateTime)
-    end_at: Mapped[datetime] = mapped_column(DateTime)
+    start_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+    end_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
     project_id: Mapped[int | None] = mapped_column(ForeignKey("projects.id"), nullable=True)
     budget_head_id: Mapped[int | None] = mapped_column(ForeignKey("budget_heads.id"), nullable=True)
-    estimated_cost: Mapped[float] = mapped_column(Numeric(14, 2), default=0)
+    estimated_cost: Mapped[Decimal] = mapped_column(Numeric(14, 2), default=Decimal("0"))
     prior_approval_required: Mapped[bool] = mapped_column(Boolean, default=False)
 
 
@@ -214,8 +214,8 @@ class GeneratedReport(Base, TimestampMixin):
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     template_id: Mapped[int] = mapped_column(ForeignKey("report_templates.id"), index=True)
     project_id: Mapped[int | None] = mapped_column(ForeignKey("projects.id"), nullable=True)
-    from_date: Mapped[datetime | None] = mapped_column(Date, nullable=True)
-    to_date: Mapped[datetime | None] = mapped_column(Date, nullable=True)
+    from_date: Mapped[date | None] = mapped_column(Date, nullable=True)
+    to_date: Mapped[date | None] = mapped_column(Date, nullable=True)
     parameters: Mapped[dict] = mapped_column(JSON, default={})
     html_output: Mapped[str] = mapped_column(Text)
     pdf_path: Mapped[str | None] = mapped_column(String(500), nullable=True)

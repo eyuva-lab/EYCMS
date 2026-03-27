@@ -1,19 +1,35 @@
 from datetime import date
+from pathlib import Path
+from uuid import uuid4
 
-from jinja2 import Template
+from jinja2.sandbox import SandboxedEnvironment
 from sqlalchemy.orm import Session
 
-from app.models import Event, GeneratedReport, Project, ReportTemplate, TemplateType, TransactionLine
+from app.models import Account, AccountType, EntryType, Event, GeneratedReport, Project, ReportTemplate, TemplateType, Transaction, TransactionLine
+
+_safe_env = SandboxedEnvironment(autoescape=False)
+REPORT_OUTPUT_DIR = Path("generated_reports")
+REPORT_OUTPUT_DIR.mkdir(exist_ok=True)
 
 
 def render_template(template_html: str, context: dict) -> str:
-    return Template(template_html).render(**context)
+    return _safe_env.from_string(template_html).render(**context)
 
 
 def build_uc_context(db: Session, project_id: int | None, from_date: date | None, to_date: date | None):
-    q = db.query(TransactionLine)
+    q = (
+        db.query(TransactionLine)
+        .join(Account, Account.id == TransactionLine.account_id)
+        .join(Transaction, Transaction.id == TransactionLine.transaction_id)
+        .filter(TransactionLine.entry_type == EntryType.debit, Account.account_type == AccountType.expense)
+    )
     if project_id:
         q = q.filter(TransactionLine.project_id == project_id)
+    if from_date:
+        q = q.filter(Transaction.txn_date >= from_date)
+    if to_date:
+        q = q.filter(Transaction.txn_date <= to_date)
+
     lines = q.all()
     total = sum(float(l.amount) for l in lines)
     project_name = "Centre"
@@ -67,14 +83,17 @@ def generate_report(
     context.update(parameters or {})
     html = render_template(template.html_template, context)
 
+    report_file = REPORT_OUTPUT_DIR / f"report_{uuid4().hex}.html"
+    report_file.write_text(html, encoding="utf-8")
+
     report = GeneratedReport(
         template_id=template_id,
         project_id=project_id,
         from_date=from_date,
         to_date=to_date,
         parameters=parameters,
-        html_output=html,
-        pdf_path=None,
+        html_output="",
+        pdf_path=str(report_file),
         created_by_id=user_id,
         updated_by_id=user_id,
     )

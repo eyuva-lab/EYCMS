@@ -1,4 +1,4 @@
-from datetime import datetime, date
+from datetime import date, datetime
 from decimal import Decimal
 from typing import Any
 
@@ -95,6 +95,12 @@ class TransactionCreate(BaseModel):
     lines: list[TransactionLineIn]
 
 
+class BudgetCheckRequest(BaseModel):
+    from_date: datetime | None = None
+    to_date: datetime | None = None
+    lines: list[TransactionLineIn]
+
+
 class TransactionOut(BaseModel):
     id: int
     txn_date: datetime
@@ -110,6 +116,13 @@ class BankStatementImportRow(BaseModel):
     debit: Decimal = Decimal("0")
     credit: Decimal = Decimal("0")
     closing_balance: Decimal | None = None
+
+
+class BankAccountCreate(BaseModel):
+    bank_name: str
+    account_number_masked: str
+    ifsc: str | None = None
+    project_id: int | None = None
 
 
 class EventCreate(BaseModel):

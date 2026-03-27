@@ -57,9 +57,25 @@ A modular FastAPI application for centre-level grant accounting and fellow subgr
 ## Key API examples
 
 - `POST /transactions` : post a balanced transaction with line items.
+- `POST /transactions/{id}/reverse` : create immutable reversal journal for a posted voucher (no hard delete).
 - `GET /transactions/centre-summary?from_date=...&to_date=...` : dashboard budget summary.
 - `POST /events/{event_id}/prior-approval?template_id=...` : render prior approval form HTML.
 - `POST /reports/generate` with template + dates + project : generate UC/SoE/newsletter outputs.
+
+
+## Security / runtime environment
+
+Set these before running:
+
+```bash
+export SECRET_KEY="<strong-random-secret>"
+export CORS_ALLOWED_ORIGINS="http://127.0.0.1:8000,http://localhost:8000"
+# optional local seed
+export SEED_DEFAULTS=true
+export SEED_COORDINATOR_PASSWORD="change-me-now"
+```
+
+`SECRET_KEY` is mandatory unless `ALLOW_INSECURE_DEV_SECRET=true` is explicitly set for local dev only.
 
 ## Run locally
 
@@ -72,7 +88,7 @@ uvicorn app.main:app --reload
 
 Open `http://127.0.0.1:8000` for dashboard UI and `http://127.0.0.1:8000/docs` for Swagger.
 
-Default seeded Coordinator on first run: `coordinator@eyuva.local` / `admin123`.
+Default seed is disabled by default. To seed locally, set `SEED_DEFAULTS=true` and optionally `SEED_COORDINATOR_PASSWORD`.
 
 
 ### Windows (PowerShell)
