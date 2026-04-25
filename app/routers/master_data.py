@@ -113,7 +113,13 @@ def create_budget_head(payload: BudgetHeadCreate, db: Session = Depends(get_db),
 
 
 @router.get("/budget-heads")
-def list_budget_heads(project_id: int | None = None, db: Session = Depends(get_db), user: User = Depends(get_current_user)):
+def list_budget_heads(
+    project_id: int | None = None,
+    limit: int = 100,
+    offset: int = 0,
+    db: Session = Depends(get_db),
+    user: User = Depends(get_current_user),
+):
     q = db.query(BudgetHead)
     if project_id:
         q = q.filter(BudgetHead.project_id == project_id)

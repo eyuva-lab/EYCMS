@@ -16,7 +16,7 @@ class UserCreate(BaseModel):
     name: str
     email: EmailStr
     password: str
-    role: UserRole
+    role: UserRole = UserRole.fellow
 
 
 class UserOut(BaseModel):

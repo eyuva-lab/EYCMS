@@ -3,7 +3,7 @@ from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 
 from app.deps import create_access_token, get_current_user, get_db, hash_password, verify_password
-from app.models import User
+from app.models import User, UserRole
 from app.schemas import TokenOut, UserCreate, UserOut
 
 router = APIRouter(prefix="/auth", tags=["auth"])
@@ -11,13 +11,15 @@ router = APIRouter(prefix="/auth", tags=["auth"])
 
 @router.post("/register", response_model=UserOut)
 def register(payload: UserCreate, db: Session = Depends(get_db)):
+    if payload.role != UserRole.fellow:
+        raise HTTPException(status_code=403, detail="Public registration can only create fellow accounts")
     if db.query(User).filter(User.email == payload.email).first():
         raise HTTPException(status_code=400, detail="Email already used")
     user = User(
         name=payload.name,
         email=payload.email,
         password_hash=hash_password(payload.password[:72]),
-        role=payload.role,
+        role=UserRole.fellow,
     )
     db.add(user)
     db.commit()
